@@ -5,8 +5,49 @@ This module contains utilities for efficiently working with 2D and 3D vectors.
 
 class Vec2D:
   
-  def __init__(self):
-    pass
+  def __init__(self, initializer=[0.0, 0.0]):
+    # Initialize instance attributes.
+    init_type = type(initializer)
+    if init_type is List:
+      self.x = initializer[0]
+      self.y = initializer[1]
+    elif init_type is Vec2D:
+      self.x = initializer.x
+      self.y = initializer.y
+
+  def set(self, vec):
+    self.x = vec.x
+    self.y = vec.y
+
+  def abs(self):
+    self.x = -self.x if self.x < 0 else self.x
+    self.y = -self.y if self.y < 0 else self.y
+
+  def neg(self):
+    self.x = -self.x
+    self.y = -self.y
+
+  def add(self, vec):
+    self.x += vec.x
+    self.y += vec.y
+
+  def sub(self, vec):
+    self.x -= vec.x
+    self.y -= vec.y
+
+  def mul(self, scalar):
+    self.x *= scalar
+    self.y *= scalar
+
+  def dot(self, vec):
+    return self.x * vec.x + self.y * vec.y
+
+  def sdist(self, vec):
+    diff = self.x - vec.x
+    sum = diff * diff
+    diff = self.y - vec.y
+    sum += diff * diff
+    return sum
 
 
 class Vec3D:
