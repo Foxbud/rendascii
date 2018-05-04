@@ -11,7 +11,7 @@ class Vec2D:
     if init_type is List:
       self.x = initializer[0]
       self.y = initializer[1]
-    elif init_type is Vec2D:
+    else:
       self.x = initializer.x
       self.y = initializer.y
 
@@ -59,7 +59,7 @@ class Vec3D:
       self.x = initializer[0]
       self.y = initializer[1]
       self.z = initializer[2]
-    elif init_type is Vec3D:
+    else:
       self.x = initializer.x
       self.y = initializer.y
       self.z = initializer.z
