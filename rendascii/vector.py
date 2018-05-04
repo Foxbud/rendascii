@@ -11,76 +11,64 @@ class Vec2D:
 
 class Vec3D:
 
-  def __init__(self, initializer=None):
+  def __init__(self, initializer=[0.0, 0.0, 0.0]):
     # Initialize instance attributes.
-    if initializer is None:
-      self._x = 0.0
-      self._y = 0.0
-      self._z = 0.0
-    else:
-      self._x = initializer[0]
-      self._y = initializer[1]
-      self._z = initializer[2]
+    init_type = type(initializer)
+    if init_type is List:
+      self.x = initializer[0]
+      self.y = initializer[1]
+      self.z = initializer[2]
+    elif init_type is Vec3D:
+      self.x = initializer.x
+      self.y = initializer.y
+      self.z = initializer.z
 
-  def set_x(self, val):
-    self._x = val
-
-  def set_y(self, val):
-    self._y = val
-
-  def set_z(self, val):
-    self._z = val
-
-  def get_x(self):
-    return self._x
-
-  def get_y(self):
-    return self._y
-
-  def get_z(self):
-    return self._z
+  def set(self, vec):
+    self.x = vec.x
+    self.y = vec.y
+    self.z = vec.z
 
   def abs(self):
-    self._x = -self._x if self._x < 0 else self._x
-    self._y = -self._y if self._y < 0 else self._y
-    self._z = -self._z if self._z < 0 else self._z
+    self.x = -self.x if self.x < 0 else self.x
+    self.y = -self.y if self.y < 0 else self.y
+    self.z = -self.z if self.z < 0 else self.z
 
   def neg(self):
-    self._x = -self._x
-    self._y = -self._y
-    self._z = -self._z
+    self.x = -self.x
+    self.y = -self.y
+    self.z = -self.z
 
   def add(self, vec):
-    self._x += vec._x
-    self._y += vec._y
-    self._z += vec._z
+    self.x += vec.x
+    self.y += vec.y
+    self.z += vec.z
 
   def sub(self, vec):
-    self._x -= vec._x
-    self._y -= vec._y
-    self._z -= vec._z
+    self.x -= vec.x
+    self.y -= vec.y
+    self.z -= vec.z
 
   def mul(self, scalar):
-    self._x *= scalar
-    self._y *= scalar
-    self._z *= scalar
+    self.x *= scalar
+    self.y *= scalar
+    self.z *= scalar
 
   def dot(self, vec):
-    return self._x * vec._x + self._y * vec._y + self._z * vec._z
+    return self.x * vec.x + self.y * vec.y + self.z * vec.z
 
   def cross(self, vec):
-    x = self._y * vec._z - self._z * vec._y
-    y = self._z * vec._x - self._x * vec._z
-    z = self._x * vec._y - self._y * vec._x
-    self._x = x
-    self._y = y
-    self._z = z
+    x = self.y * vec.z - self.z * vec.y
+    y = self.z * vec.x - self.x * vec.z
+    z = self.x * vec.y - self.y * vec.x
+    self.x = x
+    self.y = y
+    self.z = z
 
   def sdist(self, vec):
-    diff = self._x - vec._x
+    diff = self.x - vec.x
     sum = diff * diff
-    diff = self._y - vec._y
+    diff = self.y - vec.y
     sum += diff * diff
-    diff = self._z - vec._z
+    diff = self.z - vec.z
     sum += diff * diff
     return sum
