@@ -1,6 +1,9 @@
 """
-This module contains utilities for efficiently working with 2D and 3D vectors.
+TBA.
 """
+
+
+import math
 
 
 class Vec2D:
@@ -8,7 +11,7 @@ class Vec2D:
   def __init__(self, initializer=[0.0, 0.0]):
     # Initialize instance attributes.
     init_type = type(initializer)
-    if init_type is List:
+    if init_type is list:
       self.x = initializer[0]
       self.y = initializer[1]
     else:
@@ -55,7 +58,7 @@ class Vec3D:
   def __init__(self, initializer=[0.0, 0.0, 0.0]):
     # Initialize instance attributes.
     init_type = type(initializer)
-    if init_type is List:
+    if init_type is list:
       self.x = initializer[0]
       self.y = initializer[1]
       self.z = initializer[2]
@@ -113,3 +116,68 @@ class Vec3D:
     diff = self.z - vec.z
     sum += diff * diff
     return sum
+
+
+class EulerAngles:
+
+  def __init__(self, alpha=0, beta=0, gamma=0, order='xzy'):
+    # Calculate trigonometric values.
+    s1 = math.sin(alpha)
+    c1 = math.cos(alpha)
+    s2 = math.sin(beta)
+    c2 = math.cos(beta)
+    s3 = math.sin(gamma)
+    c3 = math.cos(gamma)
+
+    # Calculate rotation matrix.
+    order = order.lower()
+    
+    if order == 'xzy':
+      self.matrix = [
+          Vec3D([c2 * c3, -s2, c2 * s3]),
+          Vec3D([s1 * s3 + c1 * c3 * s2, c1 * c2, c1 * s2 * s3 - c3 * s1]),
+          Vec3D([c3 * s1 * s2 - c1 * s3, c2 * s1, c1 * c3 + s1 * s2 * s3])
+          ]
+
+    elif order == 'xyz':
+      self.matrix = [
+          Vec3D([c2 * c3, -c2 * s3, s2]),
+          Vec3D([c1 * s3 + c3 * s1 * s2, c1 * c3 - s1 * s2 * s3, -c2 * s1]),
+          Vec3D([s1 * s3 - c1 * c3 * s2, c3 * s1 + c1 * s2 * s3, c1 * c2])
+          ]
+
+    elif order == 'yxz':
+      self.matrix = [
+          Vec3D([c1 * c3 + s1 * s2 * s3, c3 * s1 * s2 - c1 * s3, c2 * s1]),
+          Vec3D([c2 * s3, c2 * c3, -s2]),
+          Vec3D([c1 * s2 * s3 - c3 * s1, c1 * c3 * s2 + s1 * s3, c1 * c2])
+          ]
+
+    elif order == 'yzx':
+      self.matrix = [
+          Vec3D([c1 * c2, s1 * s3 - c1 * c3 * s2, c3 * s1 + c1 * s2 * s3]),
+          Vec3D([s2, c2 * c3, -c2 * s3]),
+          Vec3D([-c2 * s1, c1 * s3 + c3 * s1 * s2, c1 * c3 - s1 * s2 * s3])
+          ]
+
+    elif order == 'zyx':
+      self.matrix = [
+          Vec3D([c1 * c2, c1 * s2 * s3 - c3 * s1, s1 * s2 + c1 * c3 * s2]),
+          Vec3D([c2 * s1, c1 * c3 + s1 * s2 * s3, c3 * s1 * s2 - c1 * s3]),
+          Vec3D([-s2, c2 * s3, c2 * c3])
+          ]
+
+    elif order == 'zxy':
+      self.matrix = [
+          Vec3D([c1 * c3 - s1 * s2 * s3, -c2 * s1, c1 * s3 + c3 * s1 * s2]),
+          Vec3D([c3 * s1 + c1 * s2 * s3, c1 * c2, s1 * s3 - c1 * c3 * s2]),
+          Vec3D([-c2 * s3, s2, c2 * c3])
+          ]
+
+  def transform(self, vec):
+    x = self.matrix[0].dot(vec)
+    y = self.matrix[1].dot(vec)
+    z = self.matrix[2].dot(vec)
+    vec.x = x
+    vec.y = y
+    vec.z = z
