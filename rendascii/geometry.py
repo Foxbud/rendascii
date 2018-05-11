@@ -181,3 +181,22 @@ class EulerAngles:
     vec.x = x
     vec.y = y
     vec.z = z
+
+
+class Poly2D:
+
+  def __init__(self, vertices):
+    # Initialize instance attributes.
+    self.vertices = vertices
+    self.bound_min = Vec2D([None, None])
+    self.bound_max = Vec2D([None, None])
+    # Calculate AABB.
+    for vertex in self.vertices:
+      if self.bound_min.x is None or vertex.x < self.bound_min.x:
+        self.bound_min.x = vertex.x
+      if self.bound_min.y is None or vertex.y < self.bound_min.y:
+        self.bound_min.y = vertex.y
+      if self.bound_max.x is None or vertex.x > self.bound_max.x:
+        self.bound_max.x = vertex.x
+      if self.bound_max.y is None or vertex.y > self.bound_max.y:
+        self.bound_max.y = vertex.y
