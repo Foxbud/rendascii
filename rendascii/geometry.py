@@ -190,6 +190,7 @@ class Poly2D:
     self.vertices = vertices
     self.bound_min = Vec2D([None, None])
     self.bound_max = Vec2D([None, None])
+
     # Calculate AABB.
     for vertex in self.vertices:
       if self.bound_min.x is None or vertex.x < self.bound_min.x:
@@ -200,3 +201,30 @@ class Poly2D:
         self.bound_max.x = vertex.x
       if self.bound_max.y is None or vertex.y > self.bound_max.y:
         self.bound_max.y = vertex.y
+
+  def contains_point(self, vec):
+    # Check if vector is inside AABB.
+    if (
+        self.bound_min.x < vec.x < self.bound_max.x
+        and self.bound_min.y < vec.y < self.bound_max.y
+        ):
+      # Check if vector is inside polygon.
+      start = self._side(vec, self.vertices[-1], self.vertices[0]) < 0
+
+      for i in range(len(self.vertices) - 1):
+        if (
+            (self._side(vec, self.vertices[i], self.vertices[i + 1]) <= 0)
+            != start
+            ):
+          return False
+
+      return True
+
+    return False
+
+  def _side(self, vec, line_s, line_e):
+    # Check which side of line a vector lies on (sign).
+    return (
+        (vec.x - line_e.x) * (line_s.y - line_e.y)
+        - (line_s.x - line_e.x) * (vec.y - line_e.y)
+        )
