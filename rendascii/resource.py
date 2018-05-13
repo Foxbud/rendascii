@@ -85,10 +85,10 @@ class Model:
 
       # Calculate face normal with arbitrary direction.
       origin = self.vertices[self.faces[i][0]]
-      u = Vec3D(origin)
-      u.sub(self.vertices[self.faces[i][1]])
-      v = Vec3D(origin)
-      v.sub(self.vertices[self.faces[i][2]])
+      u = self.vertices[self.faces[i][1]]
+      u.sub(Vec3D(origin))
+      v = self.vertices[self.faces[i][2]]
+      v.sub(Vec3D(origin))
       face_normal = Vec3D(u)
       face_normal.cross(v)
 
