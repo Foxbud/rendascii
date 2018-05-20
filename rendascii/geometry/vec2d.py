@@ -3,6 +3,9 @@ TBA.
 """
 
 
+from rendascii.geometry import X, Y
+
+
 def abs(vec):
   return tuple(
       -vec[X] if vec[X] < 0 else vec[X],

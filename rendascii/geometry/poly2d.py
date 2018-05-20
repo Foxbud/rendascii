@@ -3,6 +3,9 @@ TBA.
 """
 
 
+from rendascii.geometry import X, Y
+
+
 def generate_aabb(vertices, poly):
   bound_min_x = None
   bound_min_y = None

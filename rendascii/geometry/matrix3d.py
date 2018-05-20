@@ -4,6 +4,7 @@ TBA.
 
 
 from math import sin, cos
+from rendascii.geometry import X, Y, Z, ALPHA, BETA, GAMMA
 from rendascii.geometry import vec3d
 
 

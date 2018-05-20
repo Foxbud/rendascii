@@ -3,7 +3,30 @@ TBA.
 """
 
 
+from rendascii.geometry import X, Y
+from rendascii.geometry import vec2d
 from rendascii.geometry import vec3d
+
+
+def generate_camera_fragments(width, height, num_pixels_x, num_pixels_y):
+  bound_max = tuple(width / 2, height / 2)
+  bound_min = vec2d.negate(bound_max)
+  frag_size = tuple(width / num_pixels_x, height / num_pixels_y)
+
+  fragments = tuple(
+      tuple(
+        tuple(
+          bound_min[X] + frag_size[X] * (x + 0.5),
+          bound_max[Y] + frag_size[Y] * (y + 0.5)
+          )
+        for x
+        in range(num_pixels_x)
+        ]
+      for y
+      in range(num_pixels_y)
+      ]
+  
+  return fragments
 
 
 def load_model(objmesh_name, resource_dir):
