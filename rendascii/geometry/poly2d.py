@@ -8,6 +8,7 @@ def generate_aabb(vertices, poly):
   bound_min_y = None
   bound_max_x = None
   bound_max_y = None
+
   for i in poly:
     vertex = vertices[i]
     if bound_min_x is None or vertex[X] < bound_min_x:
@@ -18,31 +19,11 @@ def generate_aabb(vertices, poly):
       bound_max_x = vertex[X]
     if bound_max_y is None or vertex[Y] > bound_max_y:
       bound_max_y = vertex[Y]
+
   return tuple(
       tuple(bound_min_x, bound_min_y),
       tuple(bound_max_x, bound_max_y),
       )
-
-
-def contains_point_2d(self, vec):
-  # Check if vector is inside AABB.
-  if (
-      self.proj_bound_min.x < vec.x < self.proj_bound_max.x
-      and self.proj_bound_min.y < vec.y < self.proj_bound_max.y
-      ):
-    # Check if vector is inside polygon.
-    start = self._edge_2d(vec, self.vertices[-1], self.vertices[0]) < 0
-
-    for i in range(len(self.vertices) - 1):
-      if (
-          (self._edge_2d(vec, self.vertices[i], self.vertices[i + 1]) <= 0)
-          != start
-          ):
-        return False
-
-    return True
-
-  return False
 
 
 def aabb_contains_point(aabb, point):
@@ -53,6 +34,29 @@ def aabb_contains_point(aabb, point):
 
 
 def poly_contains_point(vertices, poly, point):
+  start = _edge(point, vertices[poly[-1]], vertices[poly[0]]) < 0
+  for i in range(len(poly) - 1):
+    if (_edge(point, vertices[poly[i]], vertices[poly[i + 1]]) <= 0) != start:
+      return False
+  return True
+
+
+def interpolate_attribute(vertices, poly, attributes, point):
+  v0 = vertices[poly[0]]
+  v1 = vertices[poly[1]]
+  v2 = vertices[poly[2]]
+
+  # Calculate baycentric weights.
+  area_t = _double_area(v0, v1, v2)
+  w0 = _double_area(point, v1, v2) / area_t
+  w1 = _double_area(point, v2, v0) / area_t
+  w2 = _double_area(point, v0, v1) / area_t
+
+  return (
+      w0 * attributes[poly[0]]
+      + w1 * attributes[poly[1]]
+      + w2 * attributes[poly[2]]
+      )
 
 
 def _edge(vec, line_s, line_e):
@@ -61,3 +65,13 @@ def _edge(vec, line_s, line_e):
       (vec[X] - line_e[X]) * (line_s[Y] - line_e[Y])
       - (line_s[X] - line_e[X]) * (vec[Y] - line_e[Y])
       )
+
+
+def _double_area(v0, v1, v2):
+  area = (
+      v0.x * v1.y + v1.x * v2.y + v2.x * v0.y
+      - v0.x * v2.y - v2.x * v1.y - v1.x * v0.y
+      )
+  if area < 0:
+    area = -area
+  return area
