@@ -7,7 +7,7 @@ from math import sin, cos
 from rendascii.geometry import vec3d
 
 
-def transform_vector_3d(matrix, vec):
+def transform_vector(matrix, vec):
   return tuple(
       vec3d.dot(matrix[X], vec),
       vec3d.dot(matrix[Y], vec),
@@ -15,7 +15,7 @@ def transform_vector_3d(matrix, vec):
       )
 
 
-def rotation_matrix_3d(euler_angles, order='xzy'):
+def generate_rotation_matrix(euler_angles, order='xzy'):
   # Calculate trigonometric values.
   s1 = sin(euler_angles[ALPHA])
   c1 = cos(euler_angles[ALPHA])
