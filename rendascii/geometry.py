@@ -6,53 +6,6 @@ TBA.
 import math
 
 
-class Vec2D:
-  
-  def __init__(self, initializer=[0.0, 0.0]):
-    # Initialize instance attributes.
-    init_type = type(initializer)
-    if init_type is list:
-      self.x = initializer[0]
-      self.y = initializer[1]
-    else:
-      self.x = initializer.x
-      self.y = initializer.y
-
-  def set(self, vec):
-    self.x = vec.x
-    self.y = vec.y
-
-  def abs(self):
-    self.x = -self.x if self.x < 0 else self.x
-    self.y = -self.y if self.y < 0 else self.y
-
-  def neg(self):
-    self.x = -self.x
-    self.y = -self.y
-
-  def add(self, vec):
-    self.x += vec.x
-    self.y += vec.y
-
-  def sub(self, vec):
-    self.x -= vec.x
-    self.y -= vec.y
-
-  def mul(self, scalar):
-    self.x *= scalar
-    self.y *= scalar
-
-  def dot(self, vec):
-    return self.x * vec.x + self.y * vec.y
-
-  def sdist(self, vec):
-    diff = self.x - vec.x
-    sum = diff * diff
-    diff = self.y - vec.y
-    sum += diff * diff
-    return sum
-
-
 class Vec3D:
 
   def __init__(self, initializer=[0.0, 0.0, 0.0]):
@@ -71,31 +24,37 @@ class Vec3D:
     self.x = vec.x
     self.y = vec.y
     self.z = vec.z
+    return self
 
   def abs(self):
     self.x = -self.x if self.x < 0 else self.x
     self.y = -self.y if self.y < 0 else self.y
     self.z = -self.z if self.z < 0 else self.z
+    return self
 
   def neg(self):
     self.x = -self.x
     self.y = -self.y
     self.z = -self.z
+    return self
 
   def add(self, vec):
     self.x += vec.x
     self.y += vec.y
     self.z += vec.z
+    return self
 
   def sub(self, vec):
     self.x -= vec.x
     self.y -= vec.y
     self.z -= vec.z
+    return self
 
   def mul(self, scalar):
     self.x *= scalar
     self.y *= scalar
     self.z *= scalar
+    return self
 
   def dot(self, vec):
     return self.x * vec.x + self.y * vec.y + self.z * vec.z
@@ -107,6 +66,7 @@ class Vec3D:
     self.x = x
     self.y = y
     self.z = z
+    return self
 
   def sdist(self, vec):
     diff = self.x - vec.x
@@ -185,9 +145,10 @@ class EulerAngles:
 
 class Polygon:
 
-  def __init__(self, vertices):
+  def __init__(self, vertices, normal):
     # Initialize instance attributes.
     self.vertices = vertices
+    self.normal = normal
     self.proj_bound_min = Vec2D([None, None])
     self.proj_bound_max = Vec2D([None, None])
 
