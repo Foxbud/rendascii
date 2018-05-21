@@ -7,35 +7,35 @@ from rendascii.geometry import X, Y
 
 
 def abs(vec):
-  return tuple(
+  return (
       -vec[X] if vec[X] < 0 else vec[X],
       -vec[Y] if vec[Y] < 0 else vec[Y],
       )
 
 
 def negate(vec):
-  return tuple(
+  return (
       -vec[X],
       -vec[Y],
       )
 
 
 def add(vec_a, vec_b):
-  return tuple(
+  return (
       vec_a[X] + vec_b[X],
       vec_a[Y] + vec_b[Y],
       )
 
 
 def subtract(vec_b, vec_a):
-  return tuple(
+  return (
       vec_b[X] - vec_a[X],
       vec_b[Y] - vec_a[Y],
       )
 
 
 def multiply(vec, scalar):
-  return tuple(
+  return (
       vec[X] * scalar,
       vec[Y] * scalar,
       )

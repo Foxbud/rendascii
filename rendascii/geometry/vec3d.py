@@ -7,7 +7,7 @@ from rendascii.geometry import X, Y, Z
 
 
 def abs(vec):
-  return tuple(
+  return (
       -vec[X] if vec[X] < 0 else vec[X],
       -vec[Y] if vec[Y] < 0 else vec[Y],
       -vec[Z] if vec[Z] < 0 else vec[Z],
@@ -15,7 +15,7 @@ def abs(vec):
 
 
 def negate(vec):
-  return tuple(
+  return (
       -vec[X],
       -vec[Y],
       -vec[Z],
@@ -23,7 +23,7 @@ def negate(vec):
 
 
 def add(vec_a, vec_b):
-  return tuple(
+  return (
       vec_a[X] + vec_b[X],
       vec_a[Y] + vec_b[Y],
       vec_a[Z] + vec_b[Z],
@@ -31,7 +31,7 @@ def add(vec_a, vec_b):
 
 
 def subtract(vec_b, vec_a):
-  return tuple(
+  return (
       vec_b[X] - vec_a[X],
       vec_b[Y] - vec_a[Y],
       vec_b[Z] - vec_a[Z],
@@ -39,7 +39,7 @@ def subtract(vec_b, vec_a):
 
 
 def multiply(vec, scalar):
-  return tuple(
+  return (
       vec[X] * scalar,
       vec[Y] * scalar,
       vec[Z] * scalar,
@@ -61,7 +61,7 @@ def squared_dist(vec_b, vec_a):
 
 
 def cross(vec_a, vec_b):
-  return tuple(
+  return (
       vec_a[Y] * vec_b[Z] - vec_a[Z] * vec_b[Y],
       vec_a[Z] * vec_b[X] - vec_a[X] * vec_b[Z],
       vec_a[X] * vec_b[Y] - vec_a[Y] * vec_b[X],

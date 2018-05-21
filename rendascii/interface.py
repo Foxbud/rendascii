@@ -5,8 +5,8 @@ TBA.
 
 from rendascii.geometry import matrix3d
 from rendascii.geometry import X, Y
-from rendascii.resources import generate_camera_fragments
-from rendascii.resources import load_mesh
+from rendascii.resource import generate_camera_fragments
+from rendascii.resource import load_mesh
 
 
 class Engine:
@@ -57,10 +57,10 @@ class Engine:
     self._textures_projected = []
     self._aabbs_projected = []
     # Pipeline - Stage 5.
-    self._pixel_fragments
+    self._pixel_fragments = []
 
-  def load_model(self, model_name, objmesh_name, resource_dir):
-    self._models[model_name] = load(model, objmesh_name, resource_dir)
+  def load_model(self, model_name, objmesh_name, resource_dir=''):
+    self._models[model_name] = load_mesh(objmesh_name, resource_dir)
 
   def unload_model(self, model_name):
     self._model_instances = [
@@ -73,7 +73,7 @@ class Engine:
 
   def create_model_instance(self, model_name):
     model_instance = ModelInstance(model_name)
-    self._models.append(model_instance)
+    self._models[model_name] = model_instance
     return model_instance
 
   def delete_model_instance(self, model_instance):
@@ -93,14 +93,14 @@ class ModelInstance:
   def __init__(self, model_name):
     # Initialize instance attributes.
     self._model_name = model_name
-    self._scale = tuple(0.0, 0.0, 0.0)
-    self._orientation = tuple(0.0, 0.0, 0.0)
+    self._scale = (0.0, 0.0, 0.0,)
+    self._orientation = (0.0, 0.0, 0.0,)
     self._angle_order = 'xzy'
     self._rot_matrix = matrix3d.generate_rotation_matrix(
         self._orientation,
         self._angle_order
         )
-    self._position = tuple(0.0, 0.0, 0.0)
+    self._position = (0.0, 0.0, 0.0,)
     self._hidden = False
 
   def update_scale(self, scale):

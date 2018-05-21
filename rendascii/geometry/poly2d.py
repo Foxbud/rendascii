@@ -23,9 +23,9 @@ def generate_aabb(vertices, poly):
     if bound_max_y is None or vertex[Y] > bound_max_y:
       bound_max_y = vertex[Y]
 
-  return tuple(
-      tuple(bound_min_x, bound_min_y),
-      tuple(bound_max_x, bound_max_y),
+  return (
+      (bound_min_x, bound_min_y,),
+      (bound_max_x, bound_max_y,),
       )
 
 

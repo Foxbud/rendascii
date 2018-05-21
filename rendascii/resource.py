@@ -9,22 +9,22 @@ from rendascii.geometry import vec3d
 
 
 def generate_camera_fragments(width, height, num_pixels_x, num_pixels_y):
-  bound_max = tuple(width / 2, height / 2)
+  bound_max = (width / 2, height / 2,)
   bound_min = vec2d.negate(bound_max)
-  frag_size = tuple(width / num_pixels_x, height / num_pixels_y)
+  frag_size = (width / num_pixels_x, height / num_pixels_y,)
 
   fragments = tuple(
       tuple(
-        tuple(
+        (
           bound_min[X] + frag_size[X] * (x + 0.5),
-          bound_max[Y] + frag_size[Y] * (y + 0.5)
+          bound_max[Y] + frag_size[Y] * (y + 0.5),
           )
         for x
         in range(num_pixels_x)
-        ]
+        )
       for y
       in range(num_pixels_y)
-      ]
+      )
   
   return fragments
 
@@ -87,12 +87,12 @@ def load_mesh(objmesh_name, resource_dir):
 
         # Check for material library.
         elif words[0] == 'mtllib':
-          materials = self._load_mtllib(words[1], resource_dir)
+          materials = _load_mtllib(words[1], resource_dir)
 
   # Calculate face normals from vertex normals.
   for i in range(len(faces)):
     # Calculate average of vertex normals.
-    avg_vert_norm = (0.0, 0.0, 0.0)
+    avg_vert_norm = (0.0, 0.0, 0.0,)
     for j in range(len(face_vert_norms[i])):
       avg_vert_norm = vec3d.add(
           avg_vert_norm,
@@ -102,8 +102,8 @@ def load_mesh(objmesh_name, resource_dir):
 
     # Calculate face normal with arbitrary direction.
     origin = vertices[faces[i][0]]
-    u = vec3d.subtract(vertices[faces[i][1], origin)
-    v = vec3d.subtract(vertices[faces[i][2], origin)
+    u = vec3d.subtract(vertices[faces[i][1]], origin)
+    v = vec3d.subtract(vertices[faces[i][2]], origin)
     face_normal = vec3d.cross(u, v)
 
     # Point face normal in correct direction.
