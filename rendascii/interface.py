@@ -15,14 +15,14 @@ class Engine:
     # Initialize instance attributes.
     # Camera.
     self._camera_scale = camera_scale
-    self._camera_orientation = (0.0, 0.0, 0.0)
+    self._camera_orientation = (0.0, 0.0, 0.0,)
     self._camera_angle_order = 'xzy'
     self._camera_rot_matrix = matrix3d.generate_rotation_matrix(
         self._camera_orientation,
         self._camera_angle_order
         )
-    self._camera_position = (0.0, 0.0, 0.0)
-    self._camera_focus = (0.0, 0.0, -camera_focal_distance)
+    self._camera_position = (0.0, 0.0, 0.0,)
+    self._camera_focus = (0.0, 0.0, -camera_focal_distance,)
     self._camera_fragments = generate_camera_fragments(
         camera_scale[X],
         camera_scale[Y],
