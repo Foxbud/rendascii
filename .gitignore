@@ -5,3 +5,4 @@ build/
 dist/
 *.obj
 *.mtl
+*.yml

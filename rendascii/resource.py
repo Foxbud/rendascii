@@ -113,12 +113,12 @@ def load_mesh(objmesh_name, resource_dir):
     # Assign new face normal to face.
     face_normals.append(face_normal)
 
-  return {
-    'vertices': vertices,
-    'polygons': faces,
-    'normals': face_normals,
-    'colors': face_colors,
-    }
+  return (
+    vertices,
+    faces,
+    face_normals,
+    face_colors,
+    )
 
 
 def _load_mtllib(mtllib_name, resource_dir):
