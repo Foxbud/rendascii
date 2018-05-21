@@ -37,9 +37,9 @@ class Engine:
     self._vert_world_scales = []
     self._vert_world_orientations = []
     self._vert_world_positions = []
-    self._polygons_world_space = []
-    self._textures_world_space = []
-    self._normals_world_space = []
+    self._polygons_model_space = []
+    self._textures_model_space = []
+    self._normals_model_space = []
     self._normal_world_orientations = []
     # Pipeline - Stage 2.
     self._verts_world_space = []
@@ -86,6 +86,26 @@ class Engine:
 
   def render_frame(self):
     pass
+
+  def _pipeline_model_to_world(self):
+    # Reset data arrays.
+    self._verts_model_space = []
+    self._vert_world_scales = []
+    self._vert_world_orientations = []
+    self._vert_world_positions = []
+    self._polygons_model_space = []
+    self._textures_model_space = []
+    self._normals_model_space = []
+    self._normal_world_orientations = []
+    # Copy instance data.
+    for instance in self._model_instances:
+      model = self._models[instance._model_name]
+      # Copy true data.
+      vertices = model['vertices']
+      polygons = model['polygons']
+      normals = model['normals']
+      colors = model['colors']
+      self._verts_model_space += vertices
 
 
 class ModelInstance:
