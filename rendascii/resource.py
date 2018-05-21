@@ -29,7 +29,7 @@ def generate_camera_fragments(width, height, num_pixels_x, num_pixels_y):
   return fragments
 
 
-def load_model(objmesh_name, resource_dir):
+def load_mesh(objmesh_name, resource_dir):
   # Initialize return values.
   vertices = []
   faces = []
