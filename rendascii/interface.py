@@ -3,6 +3,7 @@ TBA.
 """
 
 
+from rendascii import pipeline
 from rendascii.geometry import matrix3d
 from rendascii.geometry import X, Y
 from rendascii.resource import generate_camera_fragments
@@ -15,13 +16,9 @@ class Engine:
     # Initialize instance attributes.
     # Camera.
     self._camera_scale = camera_scale
-    self._camera_orientation = (0.0, 0.0, 0.0,)
-    self._camera_angle_order = 'xzy'
-    self._camera_rot_matrix = matrix3d.generate_rotation_matrix(
-        self._camera_orientation,
-        self._camera_angle_order
-        )
-    self._camera_position = (0.0, 0.0, 0.0,)
+    self._camera_orientation_rev = (0.0, 0.0, 0.0,)
+    self._camera_angle_order_rev = 'yzx'
+    self._camera_position_rev = (0.0, 0.0, 0.0,)
     self._camera_focus = (0.0, 0.0, -camera_focal_distance,)
     self._camera_fragments = generate_camera_fragments(
         camera_scale[X],
@@ -35,31 +32,19 @@ class Engine:
     self._models = {}
     self._model_instances = []
 
-    # Pipeline - Stage 1.
-    # Vertex, scale, rotation matrix, position.
-    self._verts_model = []
-    # Polygon, texture, normal, rotation matrix.
-    self._polys_model = []
-
     # Pipeline - Stage 2.
-    # Vertex, camera offset, camera rotation matrix.
-    self._verts_world = []
-    # Polygon, texture, normal, camera rotation matrix.
-    self._polys_world = []
-
-    # Pipeline - Stage 3.
     # Vertex.
     self._verts_camera = []
     # Polygon, texture, normal.
     self._polys_camera = []
 
-    # Pipeline - Stage 4.
+    # Pipeline - Stage 3.
     # Vertex, depth.
     self._verts_projected = []
     # Polygon, texture, aabb.
     self._polys_projected = []
 
-    # Pipeline - Stage 5.
+    # Pipeline - Stage 4.
     self._pixel_fragments = []
 
   def load_colormap(self, colormap_name, resource_dir=''):
@@ -91,47 +76,60 @@ class Engine:
         ]
 
   def render_frame(self):
-    pass
+    self._verts_camera, self._polys_camera = pipeline.stage_one(
+        *self._seed_pipeline()
+        )
 
-  def _pipeline_seed(self):
-    self._verts_model = []
-    self._polys_model = []
+  def _seed_pipeline(self):
+    out_vertex_data = []
+    out_polygon_data = []
+    cam_rot_matrix = matrix3d.generate_rotation_matrix(
+        self._camera_orientation_rev,
+        self._camera_angle_order_rev
+        )
     for instance in self._model_instances:
       if not instance._hidden:
-        rot_matrix = matrix3d.generate_rotation_matrix(
+        inst_rot_matrix = matrix3d.generate_rotation_matrix(
             instance._orientation,
             instance._angle_order
             )
         vertices, polygons, normals, colors = (
             self._models[instance._model_name]
             )
-        vert_offset = len(self._verts_model)
+        vert_offset = len(out_vertex_data)
+
         # Pack vertex data.
-        self._verts_model += [
+        out_vertex_data += tuple(
             (
               vertex,
-              instance._scale,
-              rot_matrix,
+              cam_rot_matrix,
+              self._camera_position_rev,
               instance._position,
+              inst_rot_matrix,
+              instance._scale,
               )
             for vertex
             in vertices
-            ]
+            )
+
         # Pack polygon data.
-        self._polys_model += [
+        out_polygon_data += tuple(
             (
               (
                 polygons[polygon][0] + vert_offset,
                 polygons[polygon][1] + vert_offset,
                 polygons[polygon][2] + vert_offset,
                 ),
-              colors[polygon],
+              self._colormap[colors[polygon]],
               normals[polygon],
-              rot_matrix,
+              cam_rot_matrix,
+              inst_rot_matrix,
               )
               for polygon
               in range(len(polygons))
-              ]
+              )
+
+    return out_vertex_data, out_polygon_data
 
 
 class ModelInstance:
@@ -139,7 +137,7 @@ class ModelInstance:
   def __init__(self, model_name):
     # Initialize instance attributes.
     self._model_name = model_name
-    self._scale = (1.0, 1.0, 1.0,)
+    self._scale = 1.0
     self._orientation = (0.0, 0.0, 0.0,)
     self._angle_order = 'xzy'
     self._rot_matrix = matrix3d.generate_rotation_matrix(
