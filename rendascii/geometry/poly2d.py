@@ -6,14 +6,13 @@ TBA.
 from rendascii.geometry import X, Y
 
 
-def generate_aabb(vertices, poly):
+def generate_aabb(poly):
   bound_min_x = None
   bound_min_y = None
   bound_max_x = None
   bound_max_y = None
 
-  for i in poly:
-    vertex = vertices[i]
+  for vertex in poly:
     if bound_min_x is None or vertex[X] < bound_min_x:
       bound_min_x = vertex[X]
     if bound_min_y is None or vertex[Y] < bound_min_y:
@@ -36,18 +35,18 @@ def aabb_contains_point(aabb, point):
       )
 
 
-def poly_contains_point(vertices, poly, point):
-  start = _edge(point, vertices[poly[-1]], vertices[poly[0]]) < 0
+def poly_contains_point(poly, point):
+  start = _edge(point, poly[-1], poly[0]) < 0
   for i in range(len(poly) - 1):
-    if (_edge(point, vertices[poly[i]], vertices[poly[i + 1]]) <= 0) != start:
+    if (_edge(point, poly[i], poly[i + 1]) <= 0) != start:
       return False
   return True
 
 
-def interpolate_attribute(vertices, poly, attributes, point):
-  v0 = vertices[poly[0]]
-  v1 = vertices[poly[1]]
-  v2 = vertices[poly[2]]
+def interpolate_attribute(poly, attributes, point):
+  v0 = poly[0]
+  v1 = poly[1]
+  v2 = poly[2]
 
   # Calculate baycentric weights.
   area_t = _double_area(v0, v1, v2)
@@ -56,9 +55,9 @@ def interpolate_attribute(vertices, poly, attributes, point):
   w2 = _double_area(point, v0, v1) / area_t
 
   return (
-      w0 * attributes[poly[0]]
-      + w1 * attributes[poly[1]]
-      + w2 * attributes[poly[2]]
+      w0 * attributes[0]
+      + w1 * attributes[1]
+      + w2 * attributes[2]
       )
 
 

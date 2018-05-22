@@ -12,40 +12,23 @@ from rendascii.resource import load_color_texture_map, load_mesh
 
 class Engine:
 
-  def __init__(self, camera_scale, camera_resolution, camera_focal_distance):
+  def __init__(self, camera_size, camera_resolution, camera_focal_distance):
     # Initialize instance attributes.
+    self._colormap = None
+    self._models = {}
+    self._model_instances = []
     # Camera.
-    self._camera_scale = camera_scale
+    self._camera_size = camera_size
     self._camera_orientation_rev = (0.0, 0.0, 0.0,)
     self._camera_angle_order_rev = 'yzx'
     self._camera_position_rev = (0.0, 0.0, 0.0,)
     self._camera_focus = (0.0, 0.0, -camera_focal_distance,)
     self._camera_fragments = generate_camera_fragments(
-        camera_scale[X],
-        camera_scale[Y],
+        camera_size[X],
+        camera_size[Y],
         camera_resolution[X],
         camera_resolution[Y]
         )
-
-    # Static.
-    self._colormap = None
-    self._models = {}
-    self._model_instances = []
-
-    # Pipeline - Stage 2.
-    # Vertex.
-    self._verts_camera = []
-    # Polygon, texture, normal.
-    self._polys_camera = []
-
-    # Pipeline - Stage 3.
-    # Vertex, depth.
-    self._verts_projected = []
-    # Polygon, texture, aabb.
-    self._polys_projected = []
-
-    # Pipeline - Stage 4.
-    self._pixel_fragments = []
 
   def load_colormap(self, colormap_name, resource_dir=''):
     self._colormap = load_color_texture_map(colormap_name, resource_dir)
@@ -76,8 +59,16 @@ class Engine:
         ]
 
   def render_frame(self):
-    self._verts_camera, self._polys_camera = pipeline.stage_one(
-        *self._seed_pipeline()
+    return (
+        pipeline.stage_four(
+          *pipeline.stage_three(
+            *pipeline.stage_two(
+              *pipeline.stage_one(
+                *self._seed_pipeline()
+                )
+              )
+            )
+          )
         )
 
   def _seed_pipeline(self):
@@ -102,6 +93,7 @@ class Engine:
         out_vertex_data += tuple(
             (
               vertex,
+              self._camera_focus,
               cam_rot_matrix,
               self._camera_position_rev,
               instance._position,
