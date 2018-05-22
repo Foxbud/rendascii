@@ -6,3 +6,4 @@ dist/
 *.obj
 *.mtl
 *.yml
+test.py

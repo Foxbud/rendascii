@@ -10,15 +10,14 @@ import yaml
 
 
 def generate_camera_fragments(width, height, num_pixels_x, num_pixels_y):
-  bound_max = (width / 2, height / 2,)
-  bound_min = vec2d.negate(bound_max)
+  bound_min = (-width / 2, -height / 2,)
   frag_size = (width / num_pixels_x, height / num_pixels_y,)
 
   fragments = tuple(
       tuple(
         (
           bound_min[X] + frag_size[X] * (x + 0.5),
-          bound_max[Y] + frag_size[Y] * (y + 0.5),
+          bound_min[Y] + frag_size[Y] * (y + 0.5),
           )
         for x
         in range(num_pixels_x)

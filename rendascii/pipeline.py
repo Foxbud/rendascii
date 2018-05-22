@@ -98,8 +98,21 @@ def stage_four(in_vertex_data, in_geometry_data, in_fragment_data):
   return out_fragment_data
 
 
+def stage_five(in_fragment_data):
+  """
+  This function handles the third block of parallelizable
+  rendering work. This includes rasterizing all pixel fragments.
+  """
+  out_fragment_data = tuple(
+      _fragment_shader_a(packed_fragment_data)
+      for packed_fragment_data
+      in in_fragment_data
+      )
+  return out_fragment_data
+
+
 def _vertex_shader_a(packed_vertex_data):
-  # Unpack vertex data from previous stage of pipeline.
+  # Unpack vertex data.
   (
       vertex,
       cam_focus,
@@ -131,7 +144,7 @@ def _vertex_shader_a(packed_vertex_data):
         )
       )
 
-  # Pack vertex data for next stage of pipeline.
+  # Pack vertex data.
   return (
       vert_camera,
       cam_focus,
@@ -139,7 +152,7 @@ def _vertex_shader_a(packed_vertex_data):
 
 
 def _vertex_shader_b(packed_vertex_data):
-  # Unpack vertex data from previous stage of pipeline.
+  # Unpack vertex data.
   (
       vertex,
       cam_focus
@@ -155,7 +168,7 @@ def _vertex_shader_b(packed_vertex_data):
       cam_focus[Y] + ratio * (vertex[Y] - cam_focus[Y]),
       )
 
-  # Pack vertex data for next stage of pipeline.
+  # Pack vertex data.
   return (
       vert_projected,
       depth,
@@ -163,7 +176,7 @@ def _vertex_shader_b(packed_vertex_data):
 
 
 def _geometry_shader_a(packed_polygon_data):
-  # Unpack polygon data from previous stage of pipeline.
+  # Unpack polygon data.
   (
       polygon,
       texture,
@@ -184,9 +197,42 @@ def _geometry_shader_a(packed_polygon_data):
       normal_world
       )
 
-  # Pack polygon data for next stage of pipeline.
+  # Pack polygon data.
   return (
       polygon,
       texture,
       normal_camera,
+      )
+
+
+def _fragment_shader_a(packed_fragment_data):
+  # Unpack fragment data.
+  (
+      fragment,
+      polygon_data
+      ) = packed_fragment_data
+
+  # Rasterize fragment.
+  current_min_depth = -1.0
+  current_texture = ' '
+  for packed_polygon_data in polygon_data:
+    # Unpack polygon data.
+    (
+        polygon,
+        depths,
+        aabb,
+        texture
+        ) = packed_polygon_data
+    # Determine if polygon contains fragment.
+    if poly2d.aabb_contains_point(aabb, fragment):
+      if poly2d.poly_contains_point(polygon, fragment):
+        # Interpolate fragment z depth.
+        depth = poly2d.interpolate_attribute(polygon, depths, fragment)
+        if current_min_depth < 0 or depth < current_min_depth:
+          if texture != '\0':
+            current_texture = texture
+
+  # Pack fragment data.
+  return (
+      current_texture,
       )

@@ -71,8 +71,8 @@ def _edge(vec, line_s, line_e):
 
 def _double_area(v0, v1, v2):
   area = (
-      v0.x * v1.y + v1.x * v2.y + v2.x * v0.y
-      - v0.x * v2.y - v2.x * v1.y - v1.x * v0.y
+      v0[X] * v1[Y] + v1[X] * v2[Y] + v2[X] * v0[Y]
+      - v0[X] * v2[Y] - v2[X] * v1[Y] - v1[X] * v0[Y]
       )
   if area < 0:
     area = -area

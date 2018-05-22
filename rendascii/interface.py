@@ -64,11 +64,13 @@ class Engine:
 
   def render_frame(self):
     return (
-        pipeline.stage_four(
-          *pipeline.stage_three(
-            *pipeline.stage_two(
-              *pipeline.stage_one(
-                *self._seed_pipeline()
+        pipeline.stage_five(
+          pipeline.stage_four(
+            *pipeline.stage_three(
+              *pipeline.stage_two(
+                *pipeline.stage_one(
+                  *self._seed_pipeline()
+                  )
                 )
               )
             )
