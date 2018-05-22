@@ -31,7 +31,7 @@ def generate_camera_fragments(width, height, num_pixels_x, num_pixels_y):
 
 
 def load_color_texture_map(colormap_name, resource_dir):
-  with open(colormap_name, 'r') as f_in:
+  with open(resource_dir + colormap_name, 'r') as f_in:
     return yaml.load(f_in)['colors']
 
 

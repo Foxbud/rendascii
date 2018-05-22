@@ -177,7 +177,7 @@ class ModelInstance:
     return self
 
   def unhide(self):
-    self.hidden = False
+    self._hidden = False
 
     # Return self for convenience.
     return self
