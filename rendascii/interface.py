@@ -19,15 +19,19 @@ class Engine:
     self._model_instances = []
     # Camera.
     self._camera_size = camera_size
+    self._camera_resolution = camera_resolution
     self._camera_orientation_rev = (0.0, 0.0, 0.0,)
     self._camera_angle_order_rev = 'yzx'
     self._camera_position_rev = (0.0, 0.0, 0.0,)
     self._camera_focus = (0.0, 0.0, -camera_focal_distance,)
-    self._camera_fragments = generate_camera_fragments(
-        camera_size[X],
-        camera_size[Y],
-        camera_resolution[X],
-        camera_resolution[Y]
+    self._camera_fragments = sum(
+        generate_camera_fragments(
+          camera_size[X],
+          camera_size[Y],
+          camera_resolution[X],
+          camera_resolution[Y]
+          ),
+        ()
         )
 
   def load_colormap(self, colormap_name, resource_dir=''):
@@ -73,7 +77,7 @@ class Engine:
 
   def _seed_pipeline(self):
     out_vertex_data = []
-    out_polygon_data = []
+    out_geometry_data = []
     cam_rot_matrix = matrix3d.generate_rotation_matrix(
         self._camera_orientation_rev,
         self._camera_angle_order_rev
@@ -105,7 +109,7 @@ class Engine:
             )
 
         # Pack polygon data.
-        out_polygon_data += tuple(
+        out_geometry_data += tuple(
             (
               (
                 polygons[polygon][0] + vert_offset,
@@ -121,7 +125,16 @@ class Engine:
               in range(len(polygons))
               )
 
-    return out_vertex_data, out_polygon_data
+    # Pack fragment data.
+    out_fragment_data = tuple(
+        (
+          fragment,
+          )
+        for fragment
+        in self._camera_fragments
+        )
+
+    return out_vertex_data, out_geometry_data, out_fragment_data
 
 
 class ModelInstance:
@@ -142,9 +155,6 @@ class ModelInstance:
   def update_scale(self, scale):
     self._scale = scale
 
-    # Return self for convenience.
-    return self
-
   def update_orientation(self, orientation, angle_order='xzy'):
     self._orientation = orientation
     self._angle_order = angle_order
@@ -153,23 +163,11 @@ class ModelInstance:
         self._angle_order
         )
 
-    # Return self for convenience.
-    return self
-
   def update_position(self, position):
     self._position = position
-
-    # Return self for convenience.
-    return self
 
   def hide(self):
     self._hidden = True
 
-    # Return self for convenience.
-    return self
-
   def unhide(self):
     self._hidden = False
-
-    # Return self for convenience.
-    return self

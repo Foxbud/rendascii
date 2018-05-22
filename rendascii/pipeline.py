@@ -7,7 +7,7 @@ from rendascii.geometry import matrix3d, poly2d, vec3d
 from rendascii.geometry import X, Y, Z
 
 
-def stage_one(in_vertex_data, in_polygon_data):
+def stage_one(in_vertex_data, in_geometry_data, in_fragment_data):
   """
   This function handles the first block of parallelizable
   rendering work. This includes transforming all vertices and polygon
@@ -19,24 +19,28 @@ def stage_one(in_vertex_data, in_polygon_data):
       for packed_vertex_data
       in in_vertex_data
       )
-  out_polygon_data = tuple(
+  out_geometry_data = tuple(
       _geometry_shader_a(packed_polygon_data)
       for packed_polygon_data
-      in in_polygon_data
+      in in_geometry_data
       )
-  return out_vertex_data, out_polygon_data
+  out_fragment_data = in_fragment_data
+  return out_vertex_data, out_geometry_data, out_fragment_data
 
 
-def stage_two(in_vertex_data, in_polygon_data):
+def stage_two(in_vertex_data, in_geometry_data, in_fragment_data):
   """
   This function handles the first block of non-parallelizable
   rendering work. This includes culling and clipping polygons outside
   the viewing frustum.
   """
-  return in_vertex_data, in_polygon_data
+  out_vertex_data = in_vertex_data
+  out_geometry_data = in_geometry_data
+  out_fragment_data = in_fragment_data
+  return out_vertex_data, out_geometry_data, out_fragment_data
 
 
-def stage_three(in_vertex_data, in_polygon_data):
+def stage_three(in_vertex_data, in_geometry_data, in_fragment_data):
   """
   This function handles the second block of parallelizable
   rendering work. This includes projecting all vertices to the
@@ -47,16 +51,19 @@ def stage_three(in_vertex_data, in_polygon_data):
       for packed_vertex_data
       in in_vertex_data
       )
-  return out_vertex_data, in_polygon_data
+  out_geometry_data = in_geometry_data
+  out_fragment_data = in_fragment_data
+  return out_vertex_data, out_geometry_data, out_fragment_data
 
 
-def stage_four(in_vertex_data, in_polygon_data):
+def stage_four(in_vertex_data, in_geometry_data, in_fragment_data):
   """
   This function handles the second block of non-parallelizable
   rendering work. This includes replacing vertex indices with vertices
-  and calculating an AABB for each polygon.
+  and calculating an AABB for each polygon and packaging a copy of
+  the geometry data with each fragment.
   """
-  out_polygon_data = tuple(
+  out_geometry_data = tuple(
       (
         (
           in_vertex_data[packed_polygon_data[0][0]][0],
@@ -78,9 +85,17 @@ def stage_four(in_vertex_data, in_polygon_data):
         packed_polygon_data[1],
         )
       for packed_polygon_data
-      in in_polygon_data
+      in in_geometry_data
       )
-  return out_polygon_data
+  out_fragment_data = tuple(
+      (
+        packed_fragment_data[0],
+        out_geometry_data,
+        )
+      for packed_fragment_data
+      in in_fragment_data
+      )
+  return out_fragment_data
 
 
 def _vertex_shader_a(packed_vertex_data):
