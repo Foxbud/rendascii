@@ -6,6 +6,7 @@ TBA.
 from rendascii.geometry import X, Y
 from rendascii.geometry import vec2d
 from rendascii.geometry import vec3d
+import yaml
 
 
 def generate_camera_fragments(width, height, num_pixels_x, num_pixels_y):
@@ -27,6 +28,11 @@ def generate_camera_fragments(width, height, num_pixels_x, num_pixels_y):
       )
   
   return fragments
+
+
+def load_color_texture_map(colormap_name, resource_dir):
+  with open(colormap_name, 'r') as f_in:
+    return yaml.load(f_in)['colors']
 
 
 def load_mesh(objmesh_name, resource_dir):

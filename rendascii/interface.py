@@ -6,7 +6,7 @@ TBA.
 from rendascii.geometry import matrix3d
 from rendascii.geometry import X, Y
 from rendascii.resource import generate_camera_fragments
-from rendascii.resource import load_mesh
+from rendascii.resource import load_color_texture_map, load_mesh
 
 
 class Engine:
@@ -31,6 +31,7 @@ class Engine:
         )
 
     # Static.
+    self._colormap = None
     self._models = {}
     self._model_instances = []
 
@@ -60,6 +61,9 @@ class Engine:
 
     # Pipeline - Stage 5.
     self._pixel_fragments = []
+
+  def load_colormap(self, colormap_name, resource_dir=''):
+    self._colormap = load_color_texture_map(colormap_name, resource_dir)
 
   def load_model(self, model_name, objmesh_name, resource_dir=''):
     self._models[model_name] = load_mesh(objmesh_name, resource_dir)
