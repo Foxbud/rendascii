@@ -9,5 +9,5 @@ setup(
     author='Garrett Fairburn',
     author_email='breadboardfox@gmail.com',
     license='MIT',
-    packages=['rendascii']
+    packages=['rendascii', 'rendascii.geometry']
 )
