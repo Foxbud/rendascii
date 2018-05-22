@@ -36,7 +36,7 @@ def aabb_contains_point(aabb, point):
 
 
 def poly_contains_point(poly, point):
-  start = _edge(point, poly[-1], poly[0]) < 0
+  start = _edge(point, poly[-1], poly[0]) <= 0
   for i in range(len(poly) - 1):
     if (_edge(point, poly[i], poly[i + 1]) <= 0) != start:
       return False

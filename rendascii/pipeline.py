@@ -213,7 +213,7 @@ def _fragment_shader_a(packed_fragment_data):
       ) = packed_fragment_data
 
   # Rasterize fragment.
-  current_min_depth = -1.0
+  current_min_depth = -1
   current_texture = ' '
   for packed_polygon_data in polygon_data:
     # Unpack polygon data.
@@ -231,6 +231,7 @@ def _fragment_shader_a(packed_fragment_data):
         if current_min_depth < 0 or depth < current_min_depth:
           if texture != '\0':
             current_texture = texture
+            current_min_depth = depth
 
   # Pack fragment data.
   return (

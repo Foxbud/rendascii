@@ -11,9 +11,9 @@ from rendascii.geometry import vec3d
 
 def transform_vector(matrix, vec):
   return (
-      vec3d.dot(matrix[X], vec),
-      vec3d.dot(matrix[Y], vec),
-      vec3d.dot(matrix[Z], vec),
+      vec3d.dot(matrix[0], vec),
+      vec3d.dot(matrix[1], vec),
+      vec3d.dot(matrix[2], vec),
       )
 
 
@@ -29,6 +29,11 @@ def generate_rotation_matrix(euler_angles, order='xzy'):
   # Calculate rotation matrix.
   order = order.lower()
   
+  #return (
+  #    (1, 0, 0,),
+  #    (0, c1, -s1,),
+  #    (0, s1, c1,),
+  #    )
   if order == 'xzy':
     return (
         (c2 * c3, -s2, c2 * s3,),

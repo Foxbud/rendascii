@@ -123,9 +123,9 @@ class Engine:
               cam_rot_matrix,
               inst_rot_matrix,
               )
-              for polygon
-              in range(len(polygons))
-              )
+            for polygon
+            in range(len(polygons))
+            )
 
     # Pack fragment data.
     out_fragment_data = tuple(
