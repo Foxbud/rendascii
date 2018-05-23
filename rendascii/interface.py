@@ -11,12 +11,15 @@ from rendascii.geometry import X, Y
 
 class Engine:
 
-  def __init__(self):
+  def __init__(self, colormap_dir='', model_dir='', material_dir=''):
     # Initialize instance attributes.
     self._cameras = []
-    self._colormap = None
+    self._colormaps = {}
     self._models = {}
     self._model_instances = []
+    self._colormap_dir = colormap_dir
+    self._model_dir = model_dir
+    self._material_dir = material_dir
 
   def create_camera(self, resolution, size=(1.0, 1.0,), focal_distance=1.0):
     camera = Camera(resolution, size, focal_distance)
@@ -31,29 +34,27 @@ class Engine:
         if next_camera is not camera
         ]
 
-  def load_colormap(self, colormap_name, resource_dir=''):
-    self._colormap = resource.load_color_texture_map(
-        colormap_name,
-        resource_dir
+  def load_colormap(self, colormap_name, colormap_filename):
+    self._colormaps[colormap_name] = resource.load_colormap(
+        colormap_filename,
+        self._colormap_dir
         )
 
-  def load_model(self, model_name, objmesh_name, resource_dir=''):
-    self._models[model_name] = resource.load_mesh(
-        objmesh_name,
-        resource_dir
+  def unload_colormap(self, colormap_name):
+    del self._colormaps[colormap_name]
+
+  def load_model(self, model_name, model_filename):
+    self._models[model_name] = resource.load_model(
+        model_filename,
+        self._model_dir,
+        self._material_dir
         )
 
   def unload_model(self, model_name):
-    self._model_instances = [
-        instance
-        for instance
-        in self._model_instances
-        if instance._model_name != model_name
-        ]
     del self._models[model_name]
 
-  def create_model_instance(self, model_name):
-    model_instance = ModelInstance(model_name)
+  def create_model_instance(self, model_name, colormap_name):
+    model_instance = ModelInstance(model_name, colormap_name)
     self._model_instances.append(model_instance)
     return model_instance
 
@@ -114,6 +115,7 @@ class Engine:
         )
     for instance in self._model_instances:
       if not instance._hidden:
+        colormap = self._colormaps[instance._colormap_name]
         inst_rot_matrix = matrix3d.generate_rotation_matrix(
             instance._orientation,
             instance._angle_order
@@ -146,7 +148,7 @@ class Engine:
                 polygons[polygon][1] + vert_offset,
                 polygons[polygon][2] + vert_offset,
                 ),
-              self._colormap[colors[polygon]],
+              colormap[colors[polygon]],
               normals[polygon],
               cam_rot_matrix,
               inst_rot_matrix,
@@ -185,10 +187,6 @@ class Camera:
         )
     self._orientation = (0.0, 0.0, 0.0,)
     self._angle_order = DEFAULT_ANGLE_ORDER
-    self._rot_matrix = matrix3d.generate_rotation_matrix(
-        self._orientation,
-        self._angle_order
-        )
     self._position = (0.0, 0.0, 0.0,)
 
   def set_orientation(self, orientation, angle_order=DEFAULT_ANGLE_ORDER):
@@ -205,16 +203,13 @@ class Camera:
 
 class ModelInstance:
 
-  def __init__(self, model_name):
+  def __init__(self, model_name, colormap_name):
     # Initialize instance attributes.
     self._model_name = model_name
+    self._colormap_name = colormap_name
     self._scale = 1.0
     self._orientation = (0.0, 0.0, 0.0,)
     self._angle_order = DEFAULT_ANGLE_ORDER
-    self._rot_matrix = matrix3d.generate_rotation_matrix(
-        self._orientation,
-        self._angle_order
-        )
     self._position = (0.0, 0.0, 0.0,)
     self._hidden = False
 

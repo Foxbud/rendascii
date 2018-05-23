@@ -29,12 +29,12 @@ def generate_camera_fragments(width, height, num_pixels_x, num_pixels_y):
   return fragments
 
 
-def load_color_texture_map(colormap_name, resource_dir):
-  with open(resource_dir + colormap_name, 'r') as f_in:
+def load_colormap(colormap_filename, colormap_dir):
+  with open(colormap_dir + colormap_filename, 'r') as f_in:
     return yaml.load(f_in)['colors']
 
 
-def load_mesh(objmesh_name, resource_dir):
+def load_model(model_filename, model_dir, material_dir):
   # Initialize return values.
   vertices = []
   faces = []
@@ -45,7 +45,7 @@ def load_mesh(objmesh_name, resource_dir):
   vertex_normals = []
   face_vert_norms = []
   materials = None
-  with open(resource_dir + objmesh_name, 'r') as obj_f:
+  with open(model_dir + model_filename, 'r') as obj_f:
     cur_mtl = None
     for line in obj_f:
       words = line.split()
@@ -92,7 +92,7 @@ def load_mesh(objmesh_name, resource_dir):
 
         # Check for material library.
         elif words[0] == 'mtllib':
-          materials = _load_mtllib(words[1], resource_dir)
+          materials = _load_materials(words[1], material_dir)
 
   # Calculate face normals from vertex normals.
   for i in range(len(faces)):
@@ -126,12 +126,12 @@ def load_mesh(objmesh_name, resource_dir):
     )
 
 
-def _load_mtllib(mtllib_name, resource_dir):
+def _load_materials(material_filename, material_dir):
   # Initialize return values.
   materials = {}
 
   # Open file.
-  with open(resource_dir + mtllib_name, 'r') as mtl_f:
+  with open(material_dir + material_filename, 'r') as mtl_f:
     cur_mtl = None
     for line in mtl_f:
       words = line.split()
