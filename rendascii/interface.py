@@ -66,7 +66,8 @@ class Engine:
         ]
 
   def render_frame(self, camera):
-    return (
+    # Pass data through pipeline to generate pixel fragments.
+    fragment_data = (
         pipeline.stage_five(
           pipeline.stage_four(
             *pipeline.stage_three(
@@ -80,9 +81,30 @@ class Engine:
           )
         )
 
+    # Reshape fragment data to camera resolution.
+    structured_fragment_data = tuple(
+        tuple(
+          fragment_data[y * camera._resolution[X] + x][0]
+          for x
+          in range(camera._resolution[X])
+          )
+        for y
+        in range(camera._resolution[Y])
+        )
+
+    # Convert structured fragment data into string.
+    return '\n'.join(
+        tuple(
+          ''.join(row)
+          for row
+          in structured_fragment_data[::-1]
+          )
+        )
+
   def _seed_pipeline(self, camera):
     out_vertex_data = []
     out_geometry_data = []
+    # Change active camera transformations to passive.
     cam_orientation = vec3d.negate(camera._orientation[::-1])
     cam_angle_order = camera._angle_order[::-1]
     cam_position = vec3d.negate(camera._position)
