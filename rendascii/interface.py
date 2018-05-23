@@ -2,43 +2,46 @@
 TBA.
 """
 
-
 from rendascii import pipeline
-from rendascii.geometry import matrix3d
+from rendascii import resource
+from rendascii.geometry import matrix3d, vec3d
+from rendascii.geometry import DEFAULT_ANGLE_ORDER
 from rendascii.geometry import X, Y
-from rendascii.resource import generate_camera_fragments
-from rendascii.resource import load_color_texture_map, load_mesh
 
 
 class Engine:
 
-  def __init__(self, camera_size, camera_resolution, camera_focal_distance):
+  def __init__(self):
     # Initialize instance attributes.
+    self._cameras = []
     self._colormap = None
     self._models = {}
     self._model_instances = []
-    # Camera.
-    self._camera_size = camera_size
-    self._camera_resolution = camera_resolution
-    self._camera_orientation_rev = (0.0, 0.0, 0.0,)
-    self._camera_angle_order_rev = 'yzx'
-    self._camera_position_rev = (0.0, 0.0, 0.0,)
-    self._camera_focus = (0.0, 0.0, -camera_focal_distance,)
-    self._camera_fragments = sum(
-        generate_camera_fragments(
-          camera_size[X],
-          camera_size[Y],
-          camera_resolution[X],
-          camera_resolution[Y]
-          ),
-        ()
-        )
+
+  def create_camera(self, resolution, size=(1.0, 1.0,), focal_distance=1.0):
+    camera = Camera(resolution, size, focal_distance)
+    self._cameras.append(camera)
+    return camera
+
+  def delete_camera(self, camera):
+    self._cameras = [
+        next_camera
+        for next_camera 
+        in self._cameras
+        if next_camera is not camera
+        ]
 
   def load_colormap(self, colormap_name, resource_dir=''):
-    self._colormap = load_color_texture_map(colormap_name, resource_dir)
+    self._colormap = resource.load_color_texture_map(
+        colormap_name,
+        resource_dir
+        )
 
   def load_model(self, model_name, objmesh_name, resource_dir=''):
-    self._models[model_name] = load_mesh(objmesh_name, resource_dir)
+    self._models[model_name] = resource.load_mesh(
+        objmesh_name,
+        resource_dir
+        )
 
   def unload_model(self, model_name):
     self._model_instances = [
@@ -59,17 +62,17 @@ class Engine:
         instance
         for instance
         in self._model_instances
-        if instance._model_name != model_name
+        if instance is not model_instance
         ]
 
-  def render_frame(self):
+  def render_frame(self, camera):
     return (
         pipeline.stage_five(
           pipeline.stage_four(
             *pipeline.stage_three(
               *pipeline.stage_two(
                 *pipeline.stage_one(
-                  *self._seed_pipeline()
+                  *self._seed_pipeline(camera)
                   )
                 )
               )
@@ -77,12 +80,15 @@ class Engine:
           )
         )
 
-  def _seed_pipeline(self):
+  def _seed_pipeline(self, camera):
     out_vertex_data = []
     out_geometry_data = []
+    cam_orientation = vec3d.negate(camera._orientation[::-1])
+    cam_angle_order = camera._angle_order[::-1]
+    cam_position = vec3d.negate(camera._position)
     cam_rot_matrix = matrix3d.generate_rotation_matrix(
-        self._camera_orientation_rev,
-        self._camera_angle_order_rev
+        cam_orientation,
+        cam_angle_order
         )
     for instance in self._model_instances:
       if not instance._hidden:
@@ -99,9 +105,9 @@ class Engine:
         out_vertex_data += tuple(
             (
               vertex,
-              self._camera_focus,
+              camera._focal_point,
               cam_rot_matrix,
-              self._camera_position_rev,
+              cam_position,
               instance._position,
               inst_rot_matrix,
               instance._scale,
@@ -133,10 +139,46 @@ class Engine:
           fragment,
           )
         for fragment
-        in self._camera_fragments
+        in camera._fragments
         )
 
     return out_vertex_data, out_geometry_data, out_fragment_data
+
+
+class Camera:
+
+  def __init__(self, resolution, size, focal_distance):
+    # Initialize instance attributes.
+    self._resolution = resolution
+    self._size = size
+    self._focal_point = (0.0, 0.0, -focal_distance,)
+    self._fragments = sum(
+        resource.generate_camera_fragments(
+          self._size[X],
+          self._size[Y],
+          self._resolution[X],
+          self._resolution[Y]
+          ),
+        ()
+        )
+    self._orientation = (0.0, 0.0, 0.0,)
+    self._angle_order = DEFAULT_ANGLE_ORDER
+    self._rot_matrix = matrix3d.generate_rotation_matrix(
+        self._orientation,
+        self._angle_order
+        )
+    self._position = (0.0, 0.0, 0.0,)
+
+  def set_orientation(self, orientation, angle_order=DEFAULT_ANGLE_ORDER):
+    self._orientation = orientation
+    self._angle_order = angle_order
+    self._rot_matrix = matrix3d.generate_rotation_matrix(
+        self._orientation,
+        self._angle_order
+        )
+
+  def set_position(self, position):
+    self._position = position
 
 
 class ModelInstance:
@@ -146,7 +188,7 @@ class ModelInstance:
     self._model_name = model_name
     self._scale = 1.0
     self._orientation = (0.0, 0.0, 0.0,)
-    self._angle_order = 'xzy'
+    self._angle_order = DEFAULT_ANGLE_ORDER
     self._rot_matrix = matrix3d.generate_rotation_matrix(
         self._orientation,
         self._angle_order
@@ -154,10 +196,10 @@ class ModelInstance:
     self._position = (0.0, 0.0, 0.0,)
     self._hidden = False
 
-  def update_scale(self, scale):
+  def set_scale(self, scale):
     self._scale = scale
 
-  def update_orientation(self, orientation, angle_order='xzy'):
+  def set_orientation(self, orientation, angle_order=DEFAULT_ANGLE_ORDER):
     self._orientation = orientation
     self._angle_order = angle_order
     self._rot_matrix = matrix3d.generate_rotation_matrix(
@@ -165,7 +207,7 @@ class ModelInstance:
         self._angle_order
         )
 
-  def update_position(self, position):
+  def set_position(self, position):
     self._position = position
 
   def hide(self):
