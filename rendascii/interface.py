@@ -3,11 +3,11 @@ TBA.
 """
 
 from multiprocessing import Pool
-from rendascii import pipeline
 from rendascii import resource
 from rendascii.geometry import matrix3d, vec3d
 from rendascii.geometry import DEFAULT_ANGLE_ORDER
 from rendascii.geometry import X, Y
+from rendascii.pipeline import packet, stage
 
 
 class Engine:
@@ -77,11 +77,11 @@ class Engine:
   def render_frame(self, camera):
     # Pass data through pipeline to generate pixel fragments.
     fragment_data = (
-        pipeline.stage_five(
-          *pipeline.stage_four(
-            *pipeline.stage_three(
-              *pipeline.stage_two(
-                *pipeline.stage_one(
+        stage.stage_five(
+          *stage.stage_four(
+            *stage.stage_three(
+              *stage.stage_two(
+                *stage.stage_one(
                   *self._seed_pipeline(camera)
                   )
                 )
@@ -93,7 +93,7 @@ class Engine:
     # Reshape fragment data to camera resolution.
     structured_fragment_data = tuple(
         tuple(
-          fragment_data[y * camera._resolution[X] + x][0]
+          fragment_data[y * camera._resolution[X] + x].texture
           for x
           in range(camera._resolution[X])
           )
@@ -128,6 +128,7 @@ class Engine:
             instance._orientation,
             instance._angle_order
             )
+        # Unpack model data.
         (
             vertices,
             polygons,
@@ -139,14 +140,14 @@ class Engine:
 
         # Pack vertex data.
         out_vertex_data += tuple(
-            (
-              vertex,
-              camera._focal_point,
-              cam_rot_matrix,
-              cam_position,
-              instance._position,
-              inst_rot_matrix,
-              instance._scale,
+            packet.S1Vertex(
+              vertex=vertex,
+              cam_focus=camera._focal_point,
+              cam_rot_matrix=cam_rot_matrix,
+              cam_position=cam_position,
+              inst_rot_matrix=inst_rot_matrix,
+              inst_position=instance._position,
+              inst_scale=instance._scale,
               )
             for vertex
             in vertices
@@ -154,21 +155,21 @@ class Engine:
 
         # Pack polygon data.
         out_polygon_data += tuple(
-            (
-              (
+            packet.S1Polygon(
+              v_polygon=(
                 polygons[polygon][0] + vert_offset,
                 polygons[polygon][1] + vert_offset,
                 polygons[polygon][2] + vert_offset,
                 ),
-              colormap[colors[polygon]],
-              normals[polygon],
-              centers[polygon],
-              camera._focal_point,
-              cam_rot_matrix,
-              cam_position,
-              instance._position,
-              inst_rot_matrix,
-              instance._scale,
+              texture=colormap[colors[polygon]],
+              normal=normals[polygon],
+              center=centers[polygon],
+              cam_focus=camera._focal_point,
+              cam_rot_matrix=cam_rot_matrix,
+              cam_position=cam_position,
+              inst_rot_matrix=inst_rot_matrix,
+              inst_position=instance._position,
+              inst_scale=instance._scale
               )
             for polygon
             in range(len(polygons))
@@ -176,8 +177,8 @@ class Engine:
 
     # Pack fragment data.
     out_fragment_data = tuple(
-        (
-          fragment,
+        packet.S4Fragment(
+          fragment=fragment
           )
         for fragment
         in camera._fragments
