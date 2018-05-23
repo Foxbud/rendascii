@@ -3,10 +3,9 @@ TBA.
 """
 
 
+import json
+from rendascii.geometry import vec2d, vec3d
 from rendascii.geometry import X, Y
-from rendascii.geometry import vec2d
-from rendascii.geometry import vec3d
-import yaml
 
 
 def generate_camera_fragments(width, height, num_pixels_x, num_pixels_y):
@@ -31,7 +30,7 @@ def generate_camera_fragments(width, height, num_pixels_x, num_pixels_y):
 
 def load_colormap(colormap_filename, colormap_dir):
   with open(colormap_dir + colormap_filename, 'r') as f_in:
-    return yaml.load(f_in)['colors']
+    return json.load(f_in)
 
 
 def load_model(model_filename, model_dir, material_dir):

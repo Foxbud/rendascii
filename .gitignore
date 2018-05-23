@@ -5,5 +5,5 @@ build/
 dist/
 *.obj
 *.mtl
-*.yml
+*.json
 test.py
