@@ -2,6 +2,7 @@
 TBA.
 """
 
+from multiprocessing import Pool
 from rendascii import pipeline
 from rendascii import resource
 from rendascii.geometry import matrix3d, vec3d
@@ -11,7 +12,13 @@ from rendascii.geometry import X, Y
 
 class Engine:
 
-  def __init__(self, colormap_dir='', model_dir='', material_dir=''):
+  def __init__(
+      self,
+      colormap_dir='',
+      model_dir='',
+      material_dir='',
+      num_workers=0
+      ):
     # Initialize instance attributes.
     self._cameras = []
     self._colormaps = {}
@@ -20,6 +27,7 @@ class Engine:
     self._colormap_dir = colormap_dir
     self._model_dir = model_dir
     self._material_dir = material_dir
+    self._workers = Pool(num_workers) if num_workers > 0 else None
 
   def create_camera(self, resolution, size=(1.0, 1.0,), focal_distance=1.0):
     camera = Camera(resolution, size, focal_distance)
@@ -70,7 +78,7 @@ class Engine:
     # Pass data through pipeline to generate pixel fragments.
     fragment_data = (
         pipeline.stage_five(
-          pipeline.stage_four(
+          *pipeline.stage_four(
             *pipeline.stage_three(
               *pipeline.stage_two(
                 *pipeline.stage_one(
@@ -175,7 +183,7 @@ class Engine:
         in camera._fragments
         )
 
-    return out_vertex_data, out_polygon_data, out_fragment_data
+    return self._workers, out_vertex_data, out_polygon_data, out_fragment_data
 
 
 class Camera:

@@ -7,28 +7,42 @@ from rendascii.geometry import matrix3d, poly2d, vec3d
 from rendascii.geometry import X, Y, Z
 
 
-def stage_one(in_vertex_data, in_polygon_data, in_fragment_data):
+def stage_one(workers, in_vertex_data, in_polygon_data, in_fragment_data):
   """
   This function handles the first block of parallelizable
   rendering work. This includes transforming all vertices and polygon
   normals from model space to camera space and culling back-face
   polygons.
   """
-  out_vertex_data = tuple(
-      _vertex_shader_a(packed_vertex_data)
-      for packed_vertex_data
-      in in_vertex_data
-      )
-  out_polygon_data = tuple(
-      _geometry_shader_a(packed_polygon_data)
-      for packed_polygon_data
-      in in_polygon_data
-      )
+  out_vertex_data = None
+  out_polygon_data = None
   out_fragment_data = in_fragment_data
-  return out_vertex_data, out_polygon_data, out_fragment_data
+
+  if workers is None:
+    out_vertex_data = tuple(
+        _vertex_shader_a(packed_vertex_data)
+        for packed_vertex_data
+        in in_vertex_data
+        )
+    out_polygon_data = tuple(
+        _geometry_shader_a(packed_polygon_data)
+        for packed_polygon_data
+        in in_polygon_data
+        )
+  else:
+    out_vertex_data = workers.map(
+        _vertex_shader_a,
+        in_vertex_data
+        )
+    out_polygon_data = workers.map(
+        _geometry_shader_a,
+        in_polygon_data
+        )
+
+  return workers, out_vertex_data, out_polygon_data, out_fragment_data
 
 
-def stage_two(in_vertex_data, in_polygon_data, in_fragment_data):
+def stage_two(workers, in_vertex_data, in_polygon_data, in_fragment_data):
   """
   This function handles the first block of non-parallelizable
   rendering work. This includes culling and clipping polygons outside
@@ -37,26 +51,35 @@ def stage_two(in_vertex_data, in_polygon_data, in_fragment_data):
   out_vertex_data = in_vertex_data
   out_polygon_data = in_polygon_data
   out_fragment_data = in_fragment_data
-  return out_vertex_data, out_polygon_data, out_fragment_data
+  return workers, out_vertex_data, out_polygon_data, out_fragment_data
 
 
-def stage_three(in_vertex_data, in_polygon_data, in_fragment_data):
+def stage_three(workers, in_vertex_data, in_polygon_data, in_fragment_data):
   """
   This function handles the second block of parallelizable
   rendering work. This includes projecting all vertices to the
   camera plane.
   """
-  out_vertex_data = tuple(
-      _vertex_shader_b(packed_vertex_data)
-      for packed_vertex_data
-      in in_vertex_data
-      )
+  out_vertex_data = None
   out_polygon_data = in_polygon_data
   out_fragment_data = in_fragment_data
-  return out_vertex_data, out_polygon_data, out_fragment_data
+
+  if workers is None:
+    out_vertex_data = tuple(
+        _vertex_shader_b(packed_vertex_data)
+        for packed_vertex_data
+        in in_vertex_data
+        )
+  else:
+    out_vertex_data = workers.map(
+        _vertex_shader_b,
+        in_vertex_data
+        )
+
+  return workers, out_vertex_data, out_polygon_data, out_fragment_data
 
 
-def stage_four(in_vertex_data, in_polygon_data, in_fragment_data):
+def stage_four(workers, in_vertex_data, in_polygon_data, in_fragment_data):
   """
   This function handles the second block of non-parallelizable
   rendering work. This includes replacing vertex indices with vertices
@@ -96,19 +119,28 @@ def stage_four(in_vertex_data, in_polygon_data, in_fragment_data):
       for packed_fragment_data
       in in_fragment_data
       )
-  return out_fragment_data
+  return workers, out_fragment_data
 
 
-def stage_five(in_fragment_data):
+def stage_five(workers, in_fragment_data):
   """
   This function handles the third block of parallelizable
   rendering work. This includes rasterizing all pixel fragments.
   """
-  out_fragment_data = tuple(
-      _fragment_shader_a(packed_fragment_data)
-      for packed_fragment_data
-      in in_fragment_data
-      )
+  out_fragment_data = None
+
+  if workers is None:
+    out_fragment_data = tuple(
+        _fragment_shader_a(packed_fragment_data)
+        for packed_fragment_data
+        in in_fragment_data
+        )
+  else:
+    out_fragment_data = workers.map(
+        _fragment_shader_a,
+        in_fragment_data
+        )
+
   return out_fragment_data
 
 
