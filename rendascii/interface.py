@@ -104,7 +104,7 @@ class Engine:
 
   def _seed_pipeline(self, camera):
     out_vertex_data = []
-    out_geometry_data = []
+    out_polygon_data = []
     # Change active camera transformations to passive.
     cam_orientation = vec3d.negate(camera._orientation[::-1])
     cam_angle_order = camera._angle_order[::-1]
@@ -120,9 +120,13 @@ class Engine:
             instance._orientation,
             instance._angle_order
             )
-        vertices, polygons, normals, colors = (
-            self._models[instance._model_name]
-            )
+        (
+            vertices,
+            polygons,
+            normals,
+            centers,
+            colors
+            ) = self._models[instance._model_name]
         vert_offset = len(out_vertex_data)
 
         # Pack vertex data.
@@ -141,7 +145,7 @@ class Engine:
             )
 
         # Pack polygon data.
-        out_geometry_data += tuple(
+        out_polygon_data += tuple(
             (
               (
                 polygons[polygon][0] + vert_offset,
@@ -150,8 +154,13 @@ class Engine:
                 ),
               colormap[colors[polygon]],
               normals[polygon],
+              centers[polygon],
+              camera._focal_point,
               cam_rot_matrix,
+              cam_position,
+              instance._position,
               inst_rot_matrix,
+              instance._scale,
               )
             for polygon
             in range(len(polygons))
@@ -166,7 +175,7 @@ class Engine:
         in camera._fragments
         )
 
-    return out_vertex_data, out_geometry_data, out_fragment_data
+    return out_vertex_data, out_polygon_data, out_fragment_data
 
 
 class Camera:

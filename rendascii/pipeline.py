@@ -7,7 +7,7 @@ from rendascii.geometry import matrix3d, poly2d, vec3d
 from rendascii.geometry import X, Y, Z
 
 
-def stage_one(in_vertex_data, in_geometry_data, in_fragment_data):
+def stage_one(in_vertex_data, in_polygon_data, in_fragment_data):
   """
   This function handles the first block of parallelizable
   rendering work. This includes transforming all vertices and polygon
@@ -19,28 +19,28 @@ def stage_one(in_vertex_data, in_geometry_data, in_fragment_data):
       for packed_vertex_data
       in in_vertex_data
       )
-  out_geometry_data = tuple(
+  out_polygon_data = tuple(
       _geometry_shader_a(packed_polygon_data)
       for packed_polygon_data
-      in in_geometry_data
+      in in_polygon_data
       )
   out_fragment_data = in_fragment_data
-  return out_vertex_data, out_geometry_data, out_fragment_data
+  return out_vertex_data, out_polygon_data, out_fragment_data
 
 
-def stage_two(in_vertex_data, in_geometry_data, in_fragment_data):
+def stage_two(in_vertex_data, in_polygon_data, in_fragment_data):
   """
   This function handles the first block of non-parallelizable
   rendering work. This includes culling and clipping polygons outside
   the viewing frustum.
   """
   out_vertex_data = in_vertex_data
-  out_geometry_data = in_geometry_data
+  out_polygon_data = in_polygon_data
   out_fragment_data = in_fragment_data
-  return out_vertex_data, out_geometry_data, out_fragment_data
+  return out_vertex_data, out_polygon_data, out_fragment_data
 
 
-def stage_three(in_vertex_data, in_geometry_data, in_fragment_data):
+def stage_three(in_vertex_data, in_polygon_data, in_fragment_data):
   """
   This function handles the second block of parallelizable
   rendering work. This includes projecting all vertices to the
@@ -51,19 +51,19 @@ def stage_three(in_vertex_data, in_geometry_data, in_fragment_data):
       for packed_vertex_data
       in in_vertex_data
       )
-  out_geometry_data = in_geometry_data
+  out_polygon_data = in_polygon_data
   out_fragment_data = in_fragment_data
-  return out_vertex_data, out_geometry_data, out_fragment_data
+  return out_vertex_data, out_polygon_data, out_fragment_data
 
 
-def stage_four(in_vertex_data, in_geometry_data, in_fragment_data):
+def stage_four(in_vertex_data, in_polygon_data, in_fragment_data):
   """
   This function handles the second block of non-parallelizable
   rendering work. This includes replacing vertex indices with vertices
   and calculating an AABB for each polygon and packaging a copy of
   the geometry data with each fragment.
   """
-  out_geometry_data = tuple(
+  out_polygon_data = tuple(
       (
         (
           in_vertex_data[packed_polygon_data[0][0]][0],
@@ -85,12 +85,13 @@ def stage_four(in_vertex_data, in_geometry_data, in_fragment_data):
         packed_polygon_data[1],
         )
       for packed_polygon_data
-      in in_geometry_data
+      in in_polygon_data
+      if packed_polygon_data is not None
       )
   out_fragment_data = tuple(
       (
         packed_fragment_data[0],
-        out_geometry_data,
+        out_polygon_data,
         )
       for packed_fragment_data
       in in_fragment_data
@@ -111,8 +112,10 @@ def stage_five(in_fragment_data):
   return out_fragment_data
 
 
-def _vertex_shader_a(packed_vertex_data):
-  # Unpack vertex data.
+def _vertex_shader_a(in_packet):
+  # Declare output packet.
+  out_packet = None
+  # Unpack input packet.
   (
       vertex,
       cam_focus,
@@ -121,7 +124,7 @@ def _vertex_shader_a(packed_vertex_data):
       position,
       inst_rot_matrix,
       scale
-      ) = packed_vertex_data
+      ) = in_packet
 
   # Transform vertex to world space.
   vert_world = vec3d.add(
@@ -144,19 +147,23 @@ def _vertex_shader_a(packed_vertex_data):
         )
       )
 
-  # Pack vertex data.
-  return (
+  # Pack output packet.
+  out_packet = (
       vert_camera,
       cam_focus,
       )
 
+  return out_packet
 
-def _vertex_shader_b(packed_vertex_data):
-  # Unpack vertex data.
+
+def _vertex_shader_b(in_packet):
+  # Declare output packet.
+  out_packet = None
+  # Unpack input packet.
   (
       vertex,
       cam_focus
-      ) = packed_vertex_data
+      ) = in_packet
 
   # Calculate vertex z depth.
   depth = vec3d.squared_dist(cam_focus, vertex)
@@ -168,27 +175,47 @@ def _vertex_shader_b(packed_vertex_data):
       cam_focus[Y] + ratio * (vertex[Y] - cam_focus[Y]),
       )
 
-  # Pack vertex data.
-  return (
+  # Pack output packet.
+  out_packet = (
       vert_projected,
       depth,
       )
 
+  return out_packet
 
-def _geometry_shader_a(packed_polygon_data):
-  # Unpack polygon data.
+
+def _geometry_shader_a(in_packet):
+  # Declare output packet.
+  out_packet = None
+  # Unpack input packet.
   (
       polygon,
       texture,
       normal,
+      center,
+      cam_focus,
       cam_rot_matrix,
-      inst_rot_matrix
-      ) = packed_polygon_data
+      cam_position,
+      position,
+      inst_rot_matrix,
+      scale
+      ) = in_packet
 
   # Transform normal to world space.
   normal_world = matrix3d.transform_vector(
       inst_rot_matrix,
       normal
+      )
+  # Transform center to world space.
+  center_world = vec3d.add(
+      position,
+      matrix3d.transform_vector(
+        inst_rot_matrix,
+        vec3d.multiply(
+          center,
+          scale
+          )
+        )
       )
 
   # Transform normal to camera space.
@@ -196,21 +223,41 @@ def _geometry_shader_a(packed_polygon_data):
       cam_rot_matrix,
       normal_world
       )
-
-  # Pack polygon data.
-  return (
-      polygon,
-      texture,
-      normal_camera,
+  # Transform center to camera space.
+  center_camera = matrix3d.transform_vector(
+      cam_rot_matrix,
+      vec3d.add(
+        cam_position,
+        center_world
+        )
       )
 
+  # Test for back-face polygon.
+  direction = vec3d.dot(
+      normal_camera,
+      vec3d.subtract(
+        center_camera,
+        cam_focus
+        )
+      )
+  if direction <= 0:
+    # Pack output packet.
+    out_packet = (
+        polygon,
+        texture,
+        )
 
-def _fragment_shader_a(packed_fragment_data):
-  # Unpack fragment data.
+  return out_packet
+
+
+def _fragment_shader_a(in_packet):
+  # Declare output packet.
+  out_packet = None
+  # Unpack input packet.
   (
       fragment,
       polygon_data
-      ) = packed_fragment_data
+      ) = in_packet
 
   # Rasterize fragment.
   current_min_depth = -1
@@ -234,6 +281,8 @@ def _fragment_shader_a(packed_fragment_data):
             current_min_depth = depth
 
   # Pack fragment data.
-  return (
+  out_packet = (
       current_texture,
       )
+
+  return out_packet

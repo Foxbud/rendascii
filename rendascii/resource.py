@@ -4,7 +4,7 @@ TBA.
 
 
 import json
-from rendascii.geometry import vec2d, vec3d
+from rendascii.geometry import poly3d, vec2d, vec3d
 from rendascii.geometry import X, Y
 
 
@@ -38,11 +38,10 @@ def load_model(model_filename, model_dir, material_dir):
   vertices = []
   faces = []
   face_normals = []
+  face_centers = []
   face_colors = []
 
   # Open file.
-  vertex_normals = []
-  face_vert_norms = []
   materials = None
   with open(model_dir + model_filename, 'r') as obj_f:
     cur_mtl = None
@@ -60,30 +59,17 @@ def load_model(model_filename, model_dir, material_dir):
                 )
               )
 
-        # Check for vertex normal definition.
-        elif words[0] == 'vn':
-          vertex_normals.append(
-              tuple(
-                float(component)
-                for component
-                in words[1:]
-                )
-              )
-
         # Check for face definition.
         elif words[0] == 'f':
           # Assign face color.
           face_colors.append(materials[cur_mtl])
           # Extract vertex and normal indices.
           verts = []
-          norms = []
           for component in words[1:]:
             vert_info = component.split('/')
             verts.append(int(vert_info[0]) - 1)
-            norms.append(int(vert_info[2]) - 1)
           # Construct face data.
           faces.append(verts)
-          face_vert_norms.append(norms)
 
         # Check for material to use.
         elif words[0] == 'usemtl':
@@ -93,34 +79,22 @@ def load_model(model_filename, model_dir, material_dir):
         elif words[0] == 'mtllib':
           materials = _load_materials(words[1], material_dir)
 
-  # Calculate face normals from vertex normals.
+  # Calculate face normals and centers.
   for i in range(len(faces)):
-    # Calculate average of vertex normals.
-    avg_vert_norm = (0.0, 0.0, 0.0,)
-    for j in range(len(face_vert_norms[i])):
-      avg_vert_norm = vec3d.add(
-          avg_vert_norm,
-          vertex_normals[face_vert_norms[i][j]]
-          )
-    avg_vert_norm = vec3d.multiply(avg_vert_norm, 1 / len(face_vert_norms[i]))
-
-    # Calculate face normal with arbitrary direction.
-    origin = vertices[faces[i][0]]
-    u = vec3d.subtract(vertices[faces[i][1]], origin)
-    v = vec3d.subtract(vertices[faces[i][2]], origin)
-    face_normal = vec3d.cross(u, v)
-
-    # Point face normal in correct direction.
-    if vec3d.dot(face_normal, avg_vert_norm) < 0:
-      face_normal = vec3d.negate(face_normal)
-
-    # Assign new face normal to face.
-    face_normals.append(face_normal)
+    verts = (
+        vertices[faces[i][0]],
+        vertices[faces[i][1]],
+        vertices[faces[i][2]],
+        )
+    center = poly3d.center(verts)
+    face_centers.append(center)
+    face_normals.append(poly3d.normal(verts))
 
   return (
     vertices,
     faces,
     face_normals,
+    face_centers,
     face_colors,
     )
 
