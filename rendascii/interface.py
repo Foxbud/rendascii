@@ -123,7 +123,6 @@ class Engine:
         (
             vertices,
             polygons,
-            normals,
             colors
             ) = self._models[instance._model_name]
         vert_offset = len(out_vertex_data)

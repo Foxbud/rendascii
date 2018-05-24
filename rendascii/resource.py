@@ -37,7 +37,6 @@ def load_model(model_filename, model_dir, material_dir):
   # Initialize return values.
   vertices = []
   faces = []
-  face_normals = []
   face_colors = []
 
   # Open file.
@@ -62,7 +61,7 @@ def load_model(model_filename, model_dir, material_dir):
         elif words[0] == 'f':
           # Assign face color.
           face_colors.append(materials[cur_mtl])
-          # Extract vertex and normal indices.
+          # Extract vertex indices.
           verts = []
           for component in words[1:]:
             vert_info = component.split('/')
@@ -78,22 +77,9 @@ def load_model(model_filename, model_dir, material_dir):
         elif words[0] == 'mtllib':
           materials = _load_materials(words[1], material_dir)
 
-  # Calculate face normals.
-  for i in range(len(faces)):
-    face_normals.append(
-        poly3d.normal(
-          (
-            vertices[faces[i][0]],
-            vertices[faces[i][1]],
-            vertices[faces[i][2]],
-            )
-          )
-        )
-
   return (
     vertices,
     faces,
-    face_normals,
     face_colors,
     )
 
