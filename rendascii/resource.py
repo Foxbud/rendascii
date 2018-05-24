@@ -38,7 +38,6 @@ def load_model(model_filename, model_dir, material_dir):
   vertices = []
   faces = []
   face_normals = []
-  face_centers = []
   face_colors = []
 
   # Open file.
@@ -79,22 +78,22 @@ def load_model(model_filename, model_dir, material_dir):
         elif words[0] == 'mtllib':
           materials = _load_materials(words[1], material_dir)
 
-  # Calculate face normals and centers.
+  # Calculate face normals.
   for i in range(len(faces)):
-    verts = (
-        vertices[faces[i][0]],
-        vertices[faces[i][1]],
-        vertices[faces[i][2]],
+    face_normals.append(
+        poly3d.normal(
+          (
+            vertices[faces[i][0]],
+            vertices[faces[i][1]],
+            vertices[faces[i][2]],
+            )
+          )
         )
-    center = poly3d.center(verts)
-    face_centers.append(center)
-    face_normals.append(poly3d.normal(verts))
 
   return (
     vertices,
     faces,
     face_normals,
-    face_centers,
     face_colors,
     )
 

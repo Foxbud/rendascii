@@ -133,7 +133,6 @@ class Engine:
             vertices,
             polygons,
             normals,
-            centers,
             colors
             ) = self._models[instance._model_name]
         vert_offset = len(out_vertex_data)
@@ -163,13 +162,9 @@ class Engine:
                 ),
               colormap[colors[polygon]],
               normals[polygon],
-              centers[polygon],
               camera._focal_point,
               cam_rot_matrix,
-              cam_position,
               inst_rot_matrix,
-              instance._position,
-              instance._scale,
               )
             for polygon
             in range(len(polygons))

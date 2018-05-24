@@ -96,13 +96,9 @@ def s1_geometry_shader(in_packet):
       v_polygon,
       texture,
       normal,
-      center,
       cam_focus,
       cam_rot_matrix,
-      cam_position,
-      inst_rot_matrix,
-      inst_position,
-      inst_scale
+      inst_rot_matrix
       ) = in_packet
 
   # Transform normal from model to world space.
@@ -110,37 +106,41 @@ def s1_geometry_shader(in_packet):
       inst_rot_matrix,
       normal
       )
-  # Transform center from model to world space.
-  center_world = vec3d.add(
-      inst_position,
-      matrix3d.transform_vector(
-        inst_rot_matrix,
-        vec3d.multiply(
-          center,
-          inst_scale
-          )
-        )
-      )
 
   # Transform normal from world to camera space.
   normal_camera = matrix3d.transform_vector(
       cam_rot_matrix,
       normal_world
       )
-  # Transform center from world to camera space.
-  center_camera = matrix3d.transform_vector(
-      cam_rot_matrix,
-      vec3d.add(
-        cam_position,
-        center_world
-        )
+
+  # Create output packet.
+  out_packet = (
+      v_polygon,
+      texture,
+      normal_camera,
+      cam_focus,
       )
+
+  return out_packet
+
+
+def s3_geometry_shader(in_packet):
+  # Declare output packet.
+  out_packet = None
+  # Unpack input packet.
+  (
+      v_polygon,
+      texture,
+      normal,
+      cam_focus,
+      vertex
+      ) = in_packet
 
   # Test for back-face polygon.
   direction = vec3d.dot(
-      normal_camera,
+      normal,
       vec3d.subtract(
-        center_camera,
+        vertex,
         cam_focus
         )
       )
