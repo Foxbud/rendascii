@@ -7,3 +7,4 @@ dist/
 *.mtl
 *.json
 test.py
+stats.bin

@@ -4,7 +4,6 @@ TBA.
 
 
 from rendascii.geometry import poly2d
-from rendascii.pipeline import packet
 from rendascii.pipeline import shader
 
 
@@ -66,34 +65,34 @@ def stage_three(workers, in_vertex_data, in_polygon_data, in_fragment_data):
 
 def stage_four(workers, in_vertex_data, in_polygon_data, in_fragment_data):
   out_polygon_data = tuple(
-      packet.S5Polygon(
-        polygon=(
-          in_vertex_data[polygon_packet.v_polygon[0]].vertex,
-          in_vertex_data[polygon_packet.v_polygon[1]].vertex,
-          in_vertex_data[polygon_packet.v_polygon[2]].vertex,
+      (
+        (
+          in_vertex_data[polygon_packet[0][0]][0],
+          in_vertex_data[polygon_packet[0][1]][0],
+          in_vertex_data[polygon_packet[0][2]][0],
           ),
-        depths=(
-          in_vertex_data[polygon_packet.v_polygon[0]].depth,
-          in_vertex_data[polygon_packet.v_polygon[1]].depth,
-          in_vertex_data[polygon_packet.v_polygon[2]].depth,
+        (
+          in_vertex_data[polygon_packet[0][0]][1],
+          in_vertex_data[polygon_packet[0][1]][1],
+          in_vertex_data[polygon_packet[0][2]][1],
           ),
-        aabb=poly2d.generate_aabb(
+        poly2d.generate_aabb(
           (
-            in_vertex_data[polygon_packet.v_polygon[0]].vertex,
-            in_vertex_data[polygon_packet.v_polygon[1]].vertex,
-            in_vertex_data[polygon_packet.v_polygon[2]].vertex,
+            in_vertex_data[polygon_packet[0][0]][0],
+            in_vertex_data[polygon_packet[0][1]][0],
+            in_vertex_data[polygon_packet[0][2]][0],
             )
           ),
-        texture=polygon_packet.texture
+        polygon_packet[1],
         )
       for polygon_packet
       in in_polygon_data
       if polygon_packet is not None
       )
   out_fragment_data = tuple(
-      packet.S5Fragment(
-        fragment=fragment_packet.fragment,
-        polygons=out_polygon_data,
+      (
+        fragment_packet[0],
+        out_polygon_data,
         )
       for fragment_packet
       in in_fragment_data
