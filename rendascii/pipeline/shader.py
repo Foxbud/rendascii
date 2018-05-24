@@ -3,7 +3,7 @@ TBA.
 """
 
 
-from rendascii.geometry import matrix3d, poly2d, vec3d
+from rendascii.geometry import matrix, poly2d, poly3d, vec3d
 from rendascii.geometry import X, Y, Z
 
 
@@ -14,32 +14,13 @@ def s1_vertex_shader(in_packet):
   (
       vertex,
       cam_focus,
-      cam_rot_matrix,
-      cam_position,
-      inst_rot_matrix,
-      inst_position,
-      inst_scale
+      transformation
       ) = in_packet
 
-  # Transform vertex from model to world space.
-  vert_world = vec3d.add(
-      inst_position,
-      matrix3d.transform_vector(
-        inst_rot_matrix,
-        vec3d.multiply(
-          vertex,
-          inst_scale
-          )
-        )
-      )
-
-  # Transform vertex from world to camera space.
-  vert_camera = matrix3d.transform_vector(
-      cam_rot_matrix,
-      vec3d.add(
-        cam_position,
-        vert_world
-        )
+  # Transform vertex from model to camera space.
+  vert_camera = matrix.transform_3d(
+      transformation,
+      vertex
       )
 
   # Create output packet.
@@ -88,42 +69,6 @@ def s3_vertex_shader(in_packet):
   return out_packet
 
 
-def s1_geometry_shader(in_packet):
-  # Declare output packet.
-  out_packet = None
-  # Unpack input packet.
-  (
-      v_polygon,
-      texture,
-      normal,
-      cam_focus,
-      cam_rot_matrix,
-      inst_rot_matrix
-      ) = in_packet
-
-  # Transform normal from model to world space.
-  normal_world = matrix3d.transform_vector(
-      inst_rot_matrix,
-      normal
-      )
-
-  # Transform normal from world to camera space.
-  normal_camera = matrix3d.transform_vector(
-      cam_rot_matrix,
-      normal_world
-      )
-
-  # Create output packet.
-  out_packet = (
-      v_polygon,
-      texture,
-      normal_camera,
-      cam_focus,
-      )
-
-  return out_packet
-
-
 def s3_geometry_shader(in_packet):
   # Declare output packet.
   out_packet = None
@@ -131,16 +76,15 @@ def s3_geometry_shader(in_packet):
   (
       v_polygon,
       texture,
-      normal,
       cam_focus,
-      vertex
+      polygon
       ) = in_packet
 
   # Test for back-face polygon.
   direction = vec3d.dot(
-      normal,
+      poly3d.normal(polygon),
       vec3d.subtract(
-        vertex,
+        polygon[0],
         cam_focus
         )
       )
@@ -170,9 +114,9 @@ def s5_fragment_shader(in_packet):
     # Unpack polygon packet.
     (
         polygon,
+        texture,
         depths,
-        aabb,
-        texture
+        aabb
         ) = polygon_packet
     # Determine if polygon contains fragment.
     if poly2d.aabb_contains_point(

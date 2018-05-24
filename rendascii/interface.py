@@ -4,8 +4,7 @@ TBA.
 
 from multiprocessing import Pool
 from rendascii import resource
-from rendascii.geometry import matrix3d, vec3d
-from rendascii.geometry import DEFAULT_ANGLE_ORDER
+from rendascii.geometry import matrix, vec3d
 from rendascii.geometry import X, Y
 from rendascii.pipeline import stage
 
@@ -113,21 +112,13 @@ class Engine:
   def _seed_pipeline(self, camera):
     out_vertex_data = []
     out_polygon_data = []
-    # Change active camera transformations to passive.
-    cam_orientation = vec3d.negate(camera._orientation[::-1])
-    cam_angle_order = camera._angle_order[::-1]
-    cam_position = vec3d.negate(camera._position)
-    cam_rot_matrix = matrix3d.generate_rotation_matrix(
-        cam_orientation,
-        cam_angle_order
-        )
     for instance in self._model_instances:
       if not instance._hidden:
-        colormap = self._colormaps[instance._colormap_name]
-        inst_rot_matrix = matrix3d.generate_rotation_matrix(
-            instance._orientation,
-            instance._angle_order
+        transformation = matrix.compose(
+            camera._transformation,
+            instance._transformation
             )
+        colormap = self._colormaps[instance._colormap_name]
         # Unpack model data.
         (
             vertices,
@@ -142,11 +133,7 @@ class Engine:
             (
               vertex,
               camera._focal_point,
-              cam_rot_matrix,
-              cam_position,
-              inst_rot_matrix,
-              instance._position,
-              instance._scale,
+              transformation,
               )
             for vertex
             in vertices
@@ -161,10 +148,7 @@ class Engine:
                 polygons[polygon][2] + vert_offset,
                 ),
               colormap[colors[polygon]],
-              normals[polygon],
               camera._focal_point,
-              cam_rot_matrix,
-              inst_rot_matrix,
               )
             for polygon
             in range(len(polygons))
@@ -198,20 +182,10 @@ class Camera:
           ),
         ()
         )
-    self._orientation = (0.0, 0.0, 0.0,)
-    self._angle_order = DEFAULT_ANGLE_ORDER
-    self._position = (0.0, 0.0, 0.0,)
+    self._transformation = matrix.IDENTITY_3D
 
-  def set_orientation(self, orientation, angle_order=DEFAULT_ANGLE_ORDER):
-    self._orientation = orientation
-    self._angle_order = angle_order
-    self._rot_matrix = matrix3d.generate_rotation_matrix(
-        self._orientation,
-        self._angle_order
-        )
-
-  def set_position(self, position):
-    self._position = position
+  def set_transformation(self, transformation):
+    self._transformation = transformation
 
 
 class ModelInstance:
@@ -220,25 +194,11 @@ class ModelInstance:
     # Initialize instance attributes.
     self._model_name = model_name
     self._colormap_name = colormap_name
-    self._scale = 1.0
-    self._orientation = (0.0, 0.0, 0.0,)
-    self._angle_order = DEFAULT_ANGLE_ORDER
-    self._position = (0.0, 0.0, 0.0,)
+    self._transformation = matrix.IDENTITY_3D
     self._hidden = False
 
-  def set_scale(self, scale):
-    self._scale = scale
-
-  def set_orientation(self, orientation, angle_order=DEFAULT_ANGLE_ORDER):
-    self._orientation = orientation
-    self._angle_order = angle_order
-    self._rot_matrix = matrix3d.generate_rotation_matrix(
-        self._orientation,
-        self._angle_order
-        )
-
-  def set_position(self, position):
-    self._position = position
+  def set_transformation(self, transformation):
+    self._transformation = transformation
 
   def hide(self):
     self._hidden = True
