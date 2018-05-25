@@ -73,7 +73,20 @@ class Engine:
         if instance is not model_instance
         ]
 
-  def render_frame(self, camera):
+  def render_frame(self, camera, overlay=None):
+    # Prepare overlay.
+    flat_overlay = (
+        tuple(
+          '\0'
+          for fragment
+          in range(len(camera._fragments))
+          )
+        if overlay is None
+        else sum(overlay, [])
+        if type(overlay[0]) is list
+        else sum(overlay, ())
+        )
+
     # Pass data through pipeline to generate pixel fragments.
     fragment_data = (
         stage.stage_five(
@@ -81,7 +94,7 @@ class Engine:
             *stage.stage_three(
               *stage.stage_two(
                 *stage.stage_one(
-                  *self._seed_pipeline(camera)
+                  *self._seed_pipeline(camera, flat_overlay)
                   )
                 )
               )
@@ -109,9 +122,11 @@ class Engine:
           )
         )
 
-  def _seed_pipeline(self, camera):
+  def _seed_pipeline(self, camera, overlay):
     out_vertex_data = []
     out_polygon_data = []
+
+    # Create model instances.
     for instance in self._model_instances:
       if not instance._hidden:
         transformation = matrix.compose(
@@ -119,6 +134,7 @@ class Engine:
             instance._transformation
             )
         colormap = self._colormaps[instance._colormap_name]
+
         # Unpack model data.
         (
             vertices,
@@ -156,10 +172,11 @@ class Engine:
     # Pack fragment data.
     out_fragment_data = tuple(
         (
-          fragment,
+          overlay[fragment],
+          camera._fragments[fragment],
           )
         for fragment
-        in camera._fragments
+        in range(len(camera._fragments))
         )
 
     return self._workers, out_vertex_data, out_polygon_data, out_fragment_data

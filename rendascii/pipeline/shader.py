@@ -88,7 +88,7 @@ def s3_geometry_shader(in_packet):
         cam_focus
         )
       )
-  if direction <= 0:
+  if direction <= 0.0:
     # Create output packet.
     out_packet = (
         v_polygon,
@@ -103,40 +103,47 @@ def s5_fragment_shader(in_packet):
   out_packet = None
   # Unpack input packet.
   (
+      overlay,
       fragment,
       polygons
       ) = in_packet
 
-  # Rasterize fragment.
-  current_min_depth = -1
+  # Determine whether to overlay or rasterize fragment.
+  current_min_depth = -1.0
   current_texture = ' '
-  for polygon_packet in polygons:
-    # Unpack polygon packet.
-    (
-        polygon,
-        texture,
-        depths,
-        aabb
-        ) = polygon_packet
-    # Determine if polygon contains fragment.
-    if poly2d.aabb_contains_point(
-        aabb,
-        fragment
-        ):
-      if poly2d.poly_contains_point(
+  if overlay != '\0':
+    # Overlay fragment.
+    current_texture = overlay
+  else:
+
+    # Rasterize fragment.
+    for polygon_packet in polygons:
+      # Unpack polygon packet.
+      (
           polygon,
+          texture,
+          depths,
+          aabb
+          ) = polygon_packet
+      # Determine if polygon contains fragment.
+      if poly2d.aabb_contains_point(
+          aabb,
           fragment
           ):
-        # Interpolate fragment z depth.
-        depth = poly2d.interpolate_attribute(
+        if poly2d.poly_contains_point(
             polygon,
-            depths,
             fragment
-            )
-        if current_min_depth < 0 or depth < current_min_depth:
-          if texture != '\0':
-            current_texture = texture
-            current_min_depth = depth
+            ):
+          # Interpolate fragment z depth.
+          depth = poly2d.interpolate_attribute(
+              polygon,
+              depths,
+              fragment
+              )
+          if current_min_depth < 0.0 or depth < current_min_depth:
+            if texture != '\0':
+              current_texture = texture
+              current_min_depth = depth
 
   # Create output packet.
   out_packet = (

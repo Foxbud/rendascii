@@ -106,6 +106,7 @@ def stage_four(workers, in_vertex_data, in_polygon_data, in_fragment_data):
   out_fragment_data = tuple(
       (
         fragment_packet[0],
+        fragment_packet[1],
         out_polygon_data,
         )
       for fragment_packet
