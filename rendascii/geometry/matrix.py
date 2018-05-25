@@ -4,9 +4,7 @@ TBA.
 
 
 import math
-#from rendascii.geometry import ALPHA, BETA, GAMMA
 from rendascii.geometry import X, Y, Z
-#from rendascii.geometry import vec3d
 
 
 IDENTITY_3D = (

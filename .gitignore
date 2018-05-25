@@ -8,3 +8,5 @@ dist/
 *.json
 test.py
 stats.bin
+*.c
+*.so

@@ -1,4 +1,6 @@
+from setuptools import find_packages
 from setuptools import setup
+
 
 setup(
     name='rendascii',
@@ -9,5 +11,7 @@ setup(
     author='Garrett Fairburn',
     author_email='breadboardfox@gmail.com',
     license='MIT',
-    packages=['rendascii', 'rendascii.geometry', 'rendascii.pipeline',]
+    packages=find_packages(),
+    package_data={'': ['*.so',],},
+    include_package_data=True
 )
