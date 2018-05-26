@@ -4,7 +4,7 @@ TBA.
 
 
 import math
-from rendascii.geometry import X, Y, Z
+from rendascii.geometry import X, Y, Z, H
 
 
 IDENTITY_3D = (
@@ -46,22 +46,27 @@ def transpose(matrix):
 
 
 def transform_3d(matrix, vector):
-  h_vec = (
+  hvec = (
       vector[X],
       vector[Y],
       vector[Z],
       1.0,
       )
-  return tuple(
+  trans_hvec = tuple(
       sum(
         tuple(
-          matrix[i][j] * h_vec[j]
+          matrix[i][j] * hvec[j]
           for j
-          in range(len(h_vec))
+          in range(len(hvec))
           )
         )
       for i
-      in range(len(vector))
+      in range(len(hvec))
+      )
+  return (
+      trans_hvec[X] / trans_hvec[H],
+      trans_hvec[Y] / trans_hvec[H],
+      trans_hvec[Z] / trans_hvec[H],
       )
 
 
@@ -95,4 +100,14 @@ def rotation_3d(theta, axis):
       (o * x * y + z * s, o * y * y + c, o * z * y - x * s, 0.0,),
       (o * x * z - y * s, o * y * z + x * s, o * z * z + c, 0.0,),
       (0.0, 0.0, 0.0, 1.0,),
+      )
+
+def projection_3d(near, far, fov, ratio):
+  cot = 1 / math.tan(fov / 2)
+  d = far - near
+  return (
+      (cot / ratio, 0.0, 0.0, 0.0,),
+      (0.0, cot, 0.0, 0.0,),
+      (0.0, 0.0, far / d, -far * near / d,),
+      (0.0, 0.0, 1.0, 0.0,),
       )

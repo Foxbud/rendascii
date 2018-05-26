@@ -8,21 +8,20 @@ from rendascii.geometry import poly3d, vec2d, vec3d
 from rendascii.geometry import X, Y
 
 
-def generate_camera_fragments(width, height, num_pixels_x, num_pixels_y):
-  bound_min = (-width / 2, -height / 2,)
-  frag_size = (width / num_pixels_x, height / num_pixels_y,)
+def generate_camera_fragments(resolution):
+  frag_size = (2 / resolution[X], 2 / resolution[Y],)
 
   fragments = tuple(
       tuple(
         (
-          bound_min[X] + frag_size[X] * (x + 0.5),
-          bound_min[Y] + frag_size[Y] * (y + 0.5),
+          -1 + frag_size[X] * (x + 0.5),
+          -1 + frag_size[Y] * (y + 0.5),
           )
         for x
-        in range(num_pixels_x)
+        in range(resolution[X])
         )
       for y
-      in range(num_pixels_y)
+      in range(resolution[Y])
       )
   
   return fragments

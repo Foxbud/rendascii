@@ -13,11 +13,10 @@ def s1_vertex_shader(in_packet):
   # Unpack input packet.
   (
       vertex,
-      cam_focus,
       transformation
       ) = in_packet
 
-  # Transform vertex from model to camera space.
+  # Transform vertex from model to view space.
   vert_camera = matrix.transform_3d(
       transformation,
       vertex
@@ -26,44 +25,6 @@ def s1_vertex_shader(in_packet):
   # Create output packet.
   out_packet = (
       vert_camera,
-      cam_focus,
-      )
-
-  return out_packet
-
-
-def s3_vertex_shader(in_packet):
-  # Declare output packet.
-  out_packet = None
-  # Unpack input packet.
-  (
-      vertex,
-      cam_focus
-      ) = in_packet
-
-  # Calculate vertex z depth.
-  depth = vec3d.squared_dist(
-      vertex,
-      cam_focus
-      )
-
-  # Project vertex from camera space onto camera plane.
-  ratio = -cam_focus[Z] / (
-      vertex[Z] - cam_focus[Z]
-      )
-  vert_projected = (
-      cam_focus[X] + ratio * (
-        vertex[X] - cam_focus[X]
-        ),
-      cam_focus[Y] + ratio * (
-        vertex[Y] - cam_focus[Y]
-        ),
-      )
-
-  # Create output packet.
-  out_packet = (
-      vert_projected,
-      depth,
       )
 
   return out_packet
@@ -74,10 +35,8 @@ def s3_geometry_shader(in_packet):
   out_packet = None
   # Unpack input packet.
   (
-      v_polygon,
-      texture,
-      cam_focus,
-      polygon
+      polygon,
+      texture
       ) = in_packet
 
   # Test for back-face polygon.
@@ -85,13 +44,13 @@ def s3_geometry_shader(in_packet):
       poly3d.normal(polygon),
       vec3d.subtract(
         polygon[0],
-        cam_focus
+        (0.0, 0.0, 0.0,)
         )
       )
   if direction <= 0.0:
     # Create output packet.
     out_packet = (
-        v_polygon,
+        polygon,
         texture,
         )
 

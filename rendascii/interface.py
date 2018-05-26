@@ -2,6 +2,7 @@
 TBA.
 """
 
+import math
 from multiprocessing import Pool
 from rendascii import resource
 from rendascii.geometry import matrix, vec3d
@@ -28,8 +29,15 @@ class Engine:
     self._material_dir = material_dir
     self._workers = Pool(num_workers) if num_workers > 0 else None
 
-  def create_camera(self, resolution, size=(1.0, 1.0,), focal_distance=1.0):
-    camera = Camera(resolution, size, focal_distance)
+  def create_camera(
+      self,
+      resolution,
+      near=1.0,
+      far=11.0,
+      fov=math.radians(70),
+      ratio=1.0
+      ):
+    camera = Camera(resolution, near, far, fov, ratio)
     self._cameras.append(camera)
     return camera
 
@@ -147,7 +155,6 @@ class Engine:
         out_vertex_data += tuple(
             (
               vertex,
-              camera._focal_point,
               transformation,
               )
             for vertex
@@ -163,7 +170,6 @@ class Engine:
                 polygons[polygon][2] + vert_offset,
                 ),
               colormap[colors[polygon]],
-              camera._focal_point,
               )
             for polygon
             in range(len(polygons))
@@ -184,24 +190,25 @@ class Engine:
 
 class Camera:
 
-  def __init__(self, resolution, size, focal_distance):
+  def __init__(self, resolution, near, far, fov, ratio):
     # Initialize instance attributes.
     self._resolution = resolution
-    self._size = size
-    self._focal_point = (0.0, 0.0, -focal_distance,)
+    self._near = near
+    self._far = far
+    self._fov = fov
+    self._ratio = ratio
+    self._projection = matrix.projection_3d(near, far, fov, ratio)
     self._fragments = sum(
-        resource.generate_camera_fragments(
-          self._size[X],
-          self._size[Y],
-          self._resolution[X],
-          self._resolution[Y]
-          ),
+        resource.generate_camera_fragments(resolution),
         ()
         )
     self._transformation = matrix.IDENTITY_3D
 
   def set_transformation(self, transformation):
-    self._transformation = transformation
+    self._transformation = matrix.compose(
+        self._projection,
+        transformation
+        )
 
 
 class ModelInstance:
