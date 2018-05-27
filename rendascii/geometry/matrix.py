@@ -4,7 +4,7 @@ TBA.
 
 
 import math
-from rendascii.geometry import X, Y, Z, H
+from rendascii.geometry import X, Y, Z, W
 
 
 IDENTITY_3D = (
@@ -64,9 +64,9 @@ def transform_3d(matrix, vector):
       in range(len(hvec))
       )
   return (
-      trans_hvec[X] / trans_hvec[H],
-      trans_hvec[Y] / trans_hvec[H],
-      trans_hvec[Z] / trans_hvec[H],
+      trans_hvec[X] / trans_hvec[W],
+      trans_hvec[Y] / trans_hvec[W],
+      trans_hvec[Z] / trans_hvec[W],
       )
 
 
