@@ -37,6 +37,11 @@ def stage_two(workers, in_vertex_data, in_polygon_data, in_fragment_data):
           in_vertex_data[polygon_packet[0][1]][0],
           in_vertex_data[polygon_packet[0][2]][0],
           ),
+        (
+          in_vertex_data[polygon_packet[0][0]][1],
+          in_vertex_data[polygon_packet[0][1]][1],
+          in_vertex_data[polygon_packet[0][2]][1],
+          ),
         polygon_packet[1],
         )
       for polygon_packet
@@ -68,6 +73,7 @@ def stage_three(workers, in_vertex_data, in_polygon_data, in_fragment_data):
 
 
 def stage_four(workers, in_vertex_data, in_polygon_data, in_fragment_data):
+  out_polygon_data = sum(in_polygon_data, ())
   out_polygon_data = tuple(
       (
         (
@@ -90,8 +96,7 @@ def stage_four(workers, in_vertex_data, in_polygon_data, in_fragment_data):
           ),
         )
       for polygon_packet
-      in in_polygon_data
-      if polygon_packet is not None
+      in out_polygon_data
       )
   out_fragment_data = tuple(
       (

@@ -3,8 +3,8 @@ TBA.
 """
 
 
-from rendascii.geometry import matrix, poly2d, poly3d, vec3d
-from rendascii.geometry import X, Y, Z
+from rendascii.geometry import matrix, poly2d, poly3d, vec3d, vech
+from rendascii.geometry import X, Y, Z, W
 
 
 def s1_vertex_shader(in_packet):
@@ -16,15 +16,19 @@ def s1_vertex_shader(in_packet):
       transformation
       ) = in_packet
 
-  # Transform vertex from model to view space.
-  vert_camera = matrix.transform_3d(
+  # Transform vertex from model to clip space.
+  vert_clip = matrix.transform_3d(
       transformation,
-      vertex
+      vech.homogenize(vertex)
       )
+
+  # Transform vertex from clip to NDC space.
+  vert_ndc = vech.normalize(vert_clip)
 
   # Create output packet.
   out_packet = (
-      vert_camera,
+      vert_clip,
+      vert_ndc,
       )
 
   return out_packet
@@ -32,29 +36,94 @@ def s1_vertex_shader(in_packet):
 
 def s3_geometry_shader(in_packet):
   # Declare output packet.
-  out_packet = None
+  out_packet = []
   # Unpack input packet.
   (
-      polygon,
+      polygon_clip,
+      polygon_ndc,
       texture
       ) = in_packet
 
-  # Test for back-face polygon.
+  # Perform back-face culling.
+  polygon_trunc = tuple(vertex[:W] for vertex in polygon_clip)
   direction = vec3d.dot(
-      poly3d.normal(polygon),
+      poly3d.normal(polygon_trunc),
       vec3d.subtract(
-        polygon[0],
+        polygon_trunc[0],
         (0.0, 0.0, 0.0,)
         )
       )
   if direction <= 0.0:
-    # Create output packet.
-    out_packet = (
-        polygon,
-        texture,
-        )
 
-  return out_packet
+    # Perform frustum culling.
+    inside = []
+    outside = []
+    for v in range(len(polygon_clip)):
+      if polygon_clip[v][Z] < 0.0:
+        outside.append(v)
+      else:
+        inside.append(v)
+
+    # No vertices outside.
+    if len(outside) == 0:
+      out_packet.append(
+          (
+            (
+              polygon_ndc[0],
+              polygon_ndc[1],
+              polygon_ndc[2],
+              ),
+            texture,
+            )
+          )
+
+    # One vertex outside.
+    elif len(outside) == 1:
+      i0 = inside[0]
+      i1 = inside[1]
+      o0 = outside[0]
+      p0 = vech.normalize(vech.project_z(polygon_clip[i0], polygon_clip[o0]))
+      p1 = vech.normalize(vech.project_z(polygon_clip[i1], polygon_clip[o0]))
+      new_poly0 = [None,] * 3
+      new_poly1 = [None,] * 3
+      new_poly0[i0] = polygon_ndc[i0]
+      new_poly0[i1] = polygon_ndc[i1]
+      new_poly0[o0] = p1
+      new_poly1[i0] = polygon_ndc[i0]
+      new_poly1[i1] = p0
+      new_poly1[o0] = p1
+      out_packet.append(
+          (
+            tuple(new_poly0),
+            texture,
+            )
+          )
+      out_packet.append(
+          (
+            tuple(new_poly1),
+            texture,
+            )
+          )
+
+    # Two vertices outside.
+    elif len(outside) == 2:
+      i0 = inside[0]
+      o0 = outside[0]
+      o1 = outside[1]
+      p0 = vech.normalize(vech.project_z(polygon_clip[i0], polygon_clip[o0]))
+      p1 = vech.normalize(vech.project_z(polygon_clip[i0], polygon_clip[o1]))
+      new_poly0 = [None,] * 3
+      new_poly0[i0] = polygon_ndc[i0]
+      new_poly0[o0] = p0
+      new_poly0[o1] = p1
+      out_packet.append(
+          (
+            tuple(new_poly0),
+            texture,
+            )
+          )
+
+  return tuple(out_packet)
 
 
 def s5_fragment_shader(in_packet):

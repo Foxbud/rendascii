@@ -5,4 +5,6 @@ build/
 dist/
 *.c
 *.so
+*.html
 test/
+build.sh

@@ -46,27 +46,16 @@ def transpose(matrix):
 
 
 def transform_3d(matrix, vector):
-  hvec = (
-      vector[X],
-      vector[Y],
-      vector[Z],
-      1.0,
-      )
-  trans_hvec = tuple(
+  return tuple(
       sum(
         tuple(
-          matrix[i][j] * hvec[j]
+          matrix[i][j] * vector[j]
           for j
-          in range(len(hvec))
+          in range(len(vector))
           )
         )
       for i
-      in range(len(hvec))
-      )
-  return (
-      trans_hvec[X] / trans_hvec[W],
-      trans_hvec[Y] / trans_hvec[W],
-      trans_hvec[Z] / trans_hvec[W],
+      in range(len(vector))
       )
 
 

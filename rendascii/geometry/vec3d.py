@@ -66,17 +66,3 @@ def cross(vec_a, vec_b):
       vec_a[Z] * vec_b[X] - vec_a[X] * vec_b[Z],
       vec_a[X] * vec_b[Y] - vec_a[Y] * vec_b[X],
       )
-
-def project_z(vec, focus):
-  ratio = -focus[Z] / (
-      vec[Z] - focus[Z]
-      )
-  return (
-      focus[X] + ratio * (
-        vec[X] - focus[X]
-        ),
-      focus[Y] + ratio * (
-        vec[Y] - focus[Y]
-        ),
-      0.0,
-      )
