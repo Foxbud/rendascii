@@ -32,6 +32,47 @@ def load_colormap(colormap_filename, colormap_dir):
     return json.load(f_in)
 
 
+def load_sprite(sprite_filename, sprite_dir):
+  # Initialize return value.
+  sprite = []
+
+  # Open file.
+  with open(sprite_dir + sprite_filename, 'r') as ppm_f:
+    raw_contents = ppm_f.read()
+    # Strip comments from file and break it into words.
+    words = []
+    for line in raw_contents.splitlines():
+      if line[0] != '#':
+        words += line.split()
+    # Skip first word for now, which should be 'P3'.
+    # Get sprite width and height.
+    width = int(words[1])
+    height = int(words[2])
+    # Get maximum pixel component value.
+    maxval = int(words[3])
+    del words[0:4]
+
+    # Iterate over every row of the sprite.
+    for r in range(height):
+      start = r * width * 3
+      end = start + width * 3
+      row = []
+      # Iterate over every pixel in row.
+      for p in range(start, end, 3):
+        row.append(
+            ''.join(
+              [
+                '{0:02x}'.format(int(words[c]))
+                for c
+                in range(p, p + 3)
+                ]
+              )
+            )
+      sprite.append(row)
+  
+  return sprite
+
+
 def load_model(model_filename, model_dir, material_dir):
   # Initialize return values.
   vertices = []
