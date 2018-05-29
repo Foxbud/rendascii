@@ -122,13 +122,13 @@ class Engine:
         )
 
     # Pass data through pipeline to generate pixel fragments.
-    fragment_data = (
-        stage.stage_five(
-          *stage.stage_four(
-            *stage.stage_three(
-              *stage.stage_two(
-                *stage.stage_one(
-                  *self._seed_pipeline(camera, flat_overlay)
+    out_data = (
+        stage.stage_three(
+          stage.sync_two(
+            stage.stage_two(
+              stage.sync_one(
+                stage.stage_one(
+                  self._seed_pipeline(camera, flat_overlay)
                   )
                 )
               )
@@ -136,10 +136,19 @@ class Engine:
           )
         )
 
+    # Outpack output data.
+    (
+        workers,
+        out_vertex_data,
+        out_polygon_data,
+        out_sprite_data,
+        out_fragment_data
+        ) = out_data
+
     # Reshape fragment data to camera resolution.
     structured_fragment_data = tuple(
         tuple(
-          fragment_data[y * camera._resolution[X] + x][0]
+          out_fragment_data[y * camera._resolution[X] + x][0]
           for x
           in range(camera._resolution[X])
           )
@@ -157,15 +166,21 @@ class Engine:
         )
 
   def _seed_pipeline(self, camera, overlay):
+    # Declare output data.
     out_vertex_data = []
     out_polygon_data = []
+    out_sprite_data = []
+    out_fragment_data = []
 
     # Create model instances.
     for instance in self._model_instances:
       if not instance._hidden:
-        transformation = matrix.compose(
-            camera._transformation,
-            instance._transformation
+        full_transformation = matrix.compose(
+            camera._projection,
+            matrix.compose(
+              camera._transformation,
+              instance._transformation
+              )
             )
         colormap = self._colormaps[instance._colormap_name]
 
@@ -178,17 +193,17 @@ class Engine:
         vert_offset = len(out_vertex_data)
 
         # Pack vertex data.
-        out_vertex_data += tuple(
+        out_vertex_data += [
             (
               vertex,
-              transformation,
+              full_transformation,
               )
             for vertex
             in vertices
-            )
+            ]
 
         # Pack polygon data.
-        out_polygon_data += tuple(
+        out_polygon_data += [
             (
               (
                 polygons[polygon][0] + vert_offset,
@@ -199,19 +214,62 @@ class Engine:
               )
             for polygon
             in range(len(polygons))
+            ]
+
+    # Create sprite instances.
+    for instance in self._sprite_instances:
+      if not instance._hidden:
+        part_transformation = matrix.compose(
+            camera._transformation,
+            instance._transformation
+            )
+        colormap = self._colormaps[instance._colormap_name]
+
+        # Unpack sprite data.
+        (
+            sprite
+            ) = self._sprites[instance._sprite_name]
+
+        # Colormap sprite.
+        mapped_sprite = tuple(
+            tuple(
+              colormap[pixel]
+              for pixel
+              in row
+              )
+            for row
+            in sprite
             )
 
+        # Pack sprite data.
+        out_sprite_data += [
+            (
+              mapped_sprite,
+              (0.0, 0.0, 0.0,),
+              (0.0, 0.5, 0.0,),
+              part_transformation,
+              camera._projection,
+              camera._ratio,
+              ),
+            ]
+
     # Pack fragment data.
-    out_fragment_data = tuple(
+    out_fragment_data += [
         (
           overlay[fragment],
           camera._fragments[fragment],
           )
         for fragment
         in range(len(camera._fragments))
-        )
+        ]
 
-    return self._workers, out_vertex_data, out_polygon_data, out_fragment_data
+    return (
+        self._workers,
+        tuple(out_vertex_data),
+        tuple(out_polygon_data),
+        tuple(out_sprite_data),
+        tuple(out_fragment_data),
+        )
 
 
 class Camera:
@@ -231,17 +289,14 @@ class Camera:
     self._transformation = matrix.IDENTITY_3D
 
   def set_transformation(self, transformation):
-    self._transformation = matrix.compose(
-        self._projection,
-        transformation
-        )
+    self._transformation = transformation
 
 
-class ModelInstance:
+class SpriteInstance:
 
-  def __init__(self, model_name, colormap_name):
+  def __init__(self, sprite_name, colormap_name):
     # Initialize instance attributes.
-    self._model_name = model_name
+    self._sprite_name = sprite_name
     self._colormap_name = colormap_name
     self._transformation = matrix.IDENTITY_3D
     self._hidden = False
@@ -259,11 +314,11 @@ class ModelInstance:
     self._hidden = False
 
 
-class SpriteInstance:
+class ModelInstance:
 
-  def __init__(self, sprite_name, colormap_name):
+  def __init__(self, model_name, colormap_name):
     # Initialize instance attributes.
-    self._sprite_name = sprite_name
+    self._model_name = model_name
     self._colormap_name = colormap_name
     self._transformation = matrix.IDENTITY_3D
     self._hidden = False

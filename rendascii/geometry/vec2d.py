@@ -3,6 +3,7 @@ TBA.
 """
 
 
+import math
 from rendascii.geometry import X, Y
 
 
@@ -45,9 +46,9 @@ def dot(vec_a, vec_b):
   return vec_a[X] * vec_b[X] + vec_a[Y] * vec_b[Y]
 
 
-def squared_dist(vec_b, vec_a):
+def distance(vec_b, vec_a):
   diff = vec_b[X] - vec_a[X]
   sum = diff * diff
   diff = vec_b[Y] - vec_a[Y]
   sum += diff * diff
-  return sum
+  return math.sqrt(sum)

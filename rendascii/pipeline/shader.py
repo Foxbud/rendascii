@@ -3,26 +3,29 @@ TBA.
 """
 
 
-from rendascii.geometry import matrix, poly2d, poly3d, vec3d, vech
+from rendascii.geometry import matrix, poly2d, poly3d, vec2d, vec3d, vech
 from rendascii.geometry import X, Y, Z, W
 
 
 def s1_vertex_shader(in_packet):
   # Declare output packet.
   out_packet = None
+
   # Unpack input packet.
   (
       vertex,
-      transformation
+      full_transformation
       ) = in_packet
 
   # Transform vertex from model to clip space.
   vert_clip = matrix.transform_3d(
-      transformation,
-      vech.homogenize(vertex)
+      full_transformation,
+      vech.homogenize(
+        vertex
+        )
       )
 
-  # Transform vertex from clip to NDC space.
+  # Normalize vertex from clip to NDC space.
   vert_ndc = vech.normalize(vert_clip)
 
   # Create output packet.
@@ -34,9 +37,10 @@ def s1_vertex_shader(in_packet):
   return out_packet
 
 
-def s3_geometry_shader(in_packet):
+def s2_polygon_shader(in_packet):
   # Declare output packet.
-  out_packet = []
+  out_packet = ()
+
   # Unpack input packet.
   (
       polygon_clip,
@@ -54,6 +58,9 @@ def s3_geometry_shader(in_packet):
         )
       )
   if direction <= 0.0:
+    # Declare packet data.
+    polys = []
+    depths = []
 
     # Perform frustum culling.
     inside = []
@@ -66,74 +73,171 @@ def s3_geometry_shader(in_packet):
 
     # No vertices outside.
     if len(outside) == 0:
-      out_packet.append(
-          (
-            (
-              polygon_ndc[0],
-              polygon_ndc[1],
-              polygon_ndc[2],
-              ),
-            texture,
-            )
-          )
+      # Initialize packet data.
+      polys = [[None,] * 3,]
+      depths = [[None,] * 3,]
+      # Set packet data.
+      polys[0][0] = polygon_ndc[0][:Z]
+      polys[0][1] = polygon_ndc[1][:Z]
+      polys[0][2] = polygon_ndc[2][:Z]
+      polys[0] = tuple(polys[0])
+      depths[0][0] = polygon_ndc[0][Z]
+      depths[0][1] = polygon_ndc[1][Z]
+      depths[0][2] = polygon_ndc[2][Z]
+      depths[0] = tuple(depths[0])
 
     # One vertex outside.
     elif len(outside) == 1:
+      # Initialize packet data.
+      polys = [[None,] * 3,] * 2
+      depths = [[None,] * 3,] * 2
+      # Calculate new polygons.
       i0 = inside[0]
       i1 = inside[1]
       o0 = outside[0]
       p0 = vech.normalize(vech.project_z(polygon_clip[i0], polygon_clip[o0]))
       p1 = vech.normalize(vech.project_z(polygon_clip[i1], polygon_clip[o0]))
-      new_poly0 = [None,] * 3
-      new_poly1 = [None,] * 3
-      new_poly0[i0] = polygon_ndc[i0]
-      new_poly0[i1] = polygon_ndc[i1]
-      new_poly0[o0] = p1
-      new_poly1[i0] = polygon_ndc[i0]
-      new_poly1[i1] = p0
-      new_poly1[o0] = p1
-      out_packet.append(
-          (
-            tuple(new_poly0),
-            texture,
-            )
-          )
-      out_packet.append(
-          (
-            tuple(new_poly1),
-            texture,
-            )
-          )
+      # Set packet data.
+      polys[0][i0] = polygon_ndc[i0][:Z]
+      polys[0][i1] = polygon_ndc[i1][:Z]
+      polys[0][o0] = p1[:Z]
+      polys[0] = tuple(polys[0])
+      depths[0][i0] = polygon_ndc[i0][Z]
+      depths[0][i1] = polygon_ndc[i1][Z]
+      depths[0][o0] = 0.0
+      depths[0] = tuple(depths[0])
+      polys[1][i0] = polygon_ndc[i0][:Z]
+      polys[1][i1] = p0[:Z]
+      polys[1][o0] = p1[:Z]
+      polys[1] = tuple(polys[1])
+      depths[1][i0] = polygon_ndc[i0][Z]
+      depths[1][i1] = 0.0
+      depths[1][o0] = 0.0
+      depths[1] = tuple(depths[1])
 
     # Two vertices outside.
     elif len(outside) == 2:
+      # Initialize packet data.
+      polys = [[None,] * 3,]
+      depths = [[None,] * 3,]
+      # Calculate new polygon.
       i0 = inside[0]
       o0 = outside[0]
       o1 = outside[1]
       p0 = vech.normalize(vech.project_z(polygon_clip[i0], polygon_clip[o0]))
       p1 = vech.normalize(vech.project_z(polygon_clip[i0], polygon_clip[o1]))
-      new_poly0 = [None,] * 3
-      new_poly0[i0] = polygon_ndc[i0]
-      new_poly0[o0] = p0
-      new_poly0[o1] = p1
-      out_packet.append(
+      # Set packet data.
+      polys[0][i0] = polygon_ndc[i0][:Z]
+      polys[0][o0] = p0[:Z]
+      polys[0][o1] = p1[:Z]
+      polys[0] = tuple(polys[0])
+      depths[0][i0] = polygon_ndc[i0][Z]
+      depths[0][o0] = 0.0
+      depths[0][o1] = 0.0
+      depths[0] = tuple(depths[0])
+
+    # Create output packet.
+    out_packet = tuple(
+        (
+          polys[p],
+          texture,
+          depths[p],
+          poly2d.generate_aabb(polys[p]),
+          )
+        for p
+        in range(len(polys))
+        )
+
+  return out_packet
+
+
+def s1_sprite_shader(in_packet):
+  # Declare output_packet.
+  out_packet = None
+
+  # Unpack input packet.
+  (
+      sprite,
+      origin,
+      bound,
+      part_transformation,
+      projection,
+      aspect_ratio
+      ) = in_packet
+
+  # Transform origin from model to camera space.
+  origin_camera_h = matrix.transform_3d(
+      part_transformation,
+      vech.homogenize(
+        origin
+        )
+      )
+
+  # Transform origin from camera to clip space.
+  origin_clip = matrix.transform_3d(
+      projection,
+      origin_camera_h
+      )
+
+  # Perform frustum culling.
+  if origin_clip[Z] >= 0.0:
+    # Transform bound from model to camera space.
+    bound_camera_h = matrix.transform_3d(
+        part_transformation,
+        vech.homogenize(
+          bound
+          )
+        )
+
+    # Reorient and transform bound from camera to clip space.
+    bound_clip = matrix.transform_3d(
+        projection,
+        vech.add(
+          origin_camera_h,
           (
-            tuple(new_poly0),
-            texture,
+            0.0,
+            vech.distance(origin_camera_h, bound_camera_h),
+            0.0,
+            0.0,
             )
           )
+        )
 
-  return tuple(out_packet)
+    # Normalize origin from clip to NDC space.
+    origin_ndc = vech.normalize(origin_clip)
+
+    # Normalize bound from clip to NDC space.
+    bound_ndc = vech.normalize(bound_clip)
+
+    # Create sprite AABB.
+    half_height = vec3d.distance(bound_ndc, origin_ndc)
+    half_width = half_height * len(sprite[0]) / len(sprite) / aspect_ratio
+    radius = (half_width, half_height,)
+
+    # Create output packet.
+    out_packet = (
+        sprite,
+        origin_ndc[Z],
+        (
+          vec2d.subtract(origin_ndc[:Z], radius),
+          vec2d.add(origin_ndc[:Z], radius),
+          ),
+        vec2d.multiply(radius, 2.0),
+        )
+
+  return out_packet
 
 
-def s5_fragment_shader(in_packet):
+def s3_fragment_shader(in_packet):
   # Declare output packet.
   out_packet = None
+
   # Unpack input packet.
   (
       overlay,
       fragment,
-      polygons
+      polygons,
+      sprites
       ) = in_packet
 
   # Determine whether to overlay or rasterize fragment.
@@ -144,7 +248,7 @@ def s5_fragment_shader(in_packet):
     current_texture = overlay
   else:
 
-    # Rasterize fragment.
+    # Rasterize fragment, checking polygons.
     for polygon_packet in polygons:
       # Unpack polygon packet.
       (
@@ -168,10 +272,36 @@ def s5_fragment_shader(in_packet):
               depths,
               fragment
               )
+          # Determine whether to update texture.
           if current_min_depth < 0.0 or depth < current_min_depth:
             if texture != '\0':
               current_texture = texture
               current_min_depth = depth
+
+    # Rasterize fragment, checking sprites.
+    for sprite_packet in sprites:
+      # Unpack sprite data.
+      (
+          sprite,
+          depth,
+          aabb,
+          size
+          ) = sprite_packet
+      # Determine if sprite contains fragment.
+      if poly2d.aabb_contains_point(
+          aabb,
+          fragment
+          ):
+        # Interpolate fragment texture.
+        point = vec2d.subtract(fragment, aabb[0])
+        x = int(point[X] / size[X] * len(sprite[0]))
+        y = int(point[Y] / size[Y] * len(sprite))
+        texture = sprite[y][x]
+        # Determine whether to update texture.
+        if current_min_depth < 0.0 or depth < current_min_depth:
+          if texture != '\0':
+            current_texture = texture
+            current_min_depth = depth
 
   # Create output packet.
   out_packet = (

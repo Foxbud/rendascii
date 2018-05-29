@@ -28,8 +28,14 @@ def generate_camera_fragments(resolution):
 
 
 def load_colormap(colormap_filename, colormap_dir):
+  # Open file.
   with open(colormap_dir + colormap_filename, 'r') as f_in:
-    return json.load(f_in)
+    colormap = json.load(f_in)
+    for key in colormap:
+      value = colormap[key]
+      colormap[key] = '\0' if value == '' else value[0]
+
+  return colormap
 
 
 def load_sprite(sprite_filename, sprite_dir):
@@ -70,7 +76,7 @@ def load_sprite(sprite_filename, sprite_dir):
             )
       sprite.append(row)
   
-  return sprite
+  return sprite[::-1]
 
 
 def load_model(model_filename, model_dir, material_dir):
