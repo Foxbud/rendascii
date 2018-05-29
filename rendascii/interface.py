@@ -15,6 +15,7 @@ class Engine:
   def __init__(
       self,
       colormap_dir='',
+      sprite_dir='',
       model_dir='',
       material_dir='',
       num_workers=0
@@ -24,7 +25,10 @@ class Engine:
     self._colormaps = {}
     self._models = {}
     self._model_instances = []
+    self._sprites = {}
+    self._sprite_instances = []
     self._colormap_dir = colormap_dir
+    self._sprite_dir = sprite_dir
     self._model_dir = model_dir
     self._material_dir = material_dir
     self._workers = Pool(num_workers) if num_workers > 0 else None
@@ -58,6 +62,15 @@ class Engine:
   def unload_colormap(self, colormap_name):
     del self._colormaps[colormap_name]
 
+  def load_sprite(self, sprite_name, sprite_filename):
+    self._sprites[sprite_name] = resource.load_sprite(
+        sprite_filename,
+        self._sprite_dir
+        )
+
+  def unload_sprite(self, sprite_name):
+    del self._sprites[sprite_name]
+
   def load_model(self, model_name, model_filename):
     self._models[model_name] = resource.load_model(
         model_filename,
@@ -67,6 +80,19 @@ class Engine:
 
   def unload_model(self, model_name):
     del self._models[model_name]
+
+  def create_sprite_instance(self, sprite_name, colormap_name):
+    sprite_instance = SpriteInstance(sprite_name, colormap_name)
+    self._sprite_instances.append(sprite_instance)
+    return sprite_instance
+
+  def delete_sprite_instance(self, sprite_instance):
+    self._sprite_instances = [
+        instance
+        for instance
+        in self._sprite_instances
+        if instance is not sprite_instance
+        ]
 
   def create_model_instance(self, model_name, colormap_name):
     model_instance = ModelInstance(model_name, colormap_name)
@@ -219,6 +245,31 @@ class ModelInstance:
     self._colormap_name = colormap_name
     self._transformation = matrix.IDENTITY_3D
     self._hidden = False
+
+  def set_colormap(self, colormap_name):
+    self._colormap_name = colormap_name
+
+  def set_transformation(self, transformation):
+    self._transformation = transformation
+
+  def hide(self):
+    self._hidden = True
+
+  def unhide(self):
+    self._hidden = False
+
+
+class SpriteInstance:
+
+  def __init__(self, sprite_name, colormap_name):
+    # Initialize instance attributes.
+    self._sprite_name = sprite_name
+    self._colormap_name = colormap_name
+    self._transformation = matrix.IDENTITY_3D
+    self._hidden = False
+
+  def set_colormap(self, colormap_name):
+    self._colormap_name = colormap_name
 
   def set_transformation(self, transformation):
     self._transformation = transformation
