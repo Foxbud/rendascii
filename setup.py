@@ -65,6 +65,4 @@ setup(
     author_email='breadboardfox@gmail.com',
     license='MIT',
     packages=find_packages(),
-    #package_data={'': ['*.so',],},
-    #include_package_data=True
 )

@@ -8,3 +8,4 @@ dist/
 *.html
 test/
 build.sh
+.eggs/
