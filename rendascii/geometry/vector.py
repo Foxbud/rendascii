@@ -100,6 +100,22 @@ def project_z_h(vec, focus, ):
 
 # Vector conversion functions.
 
+def conv_2d_to_3d(vec_2d, order=(X, Y, None,)):
+  return tuple(
+      vec_2d[order[c]] if order[c] is not None else 0.0
+      for c
+      in range(len(order))
+      )
+
+
+def conv_3d_to_2d(vec_3d, order=(X, Y,)):
+  return tuple(
+      vec_3d[order[c]]
+      for c
+      in range(len(order))
+      )
+
+
 def conv_3d_to_h(vec_3d, w=1.0):
   return (
       vec_3d[X],

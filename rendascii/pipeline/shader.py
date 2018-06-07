@@ -52,11 +52,10 @@ def s2_polygon_shader(in_packet):
   # Perform back-face culling.
   polygon_trunc = tuple(vertex[:W] for vertex in polygon_clip)
   direction = vector.dot(
-      polygon.normal_3d(polygon_trunc),
-      vector.subtract(
-        polygon_trunc[0],
-        (0.0, 0.0, 0.0,)
-        )
+      polygon.normal_3d(
+        polygon_trunc
+        ),
+      polygon_trunc[0],
       )
   if direction <= 0.0:
     # Declare packet data.

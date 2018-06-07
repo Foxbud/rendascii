@@ -46,17 +46,17 @@ def transpose(matrix):
       )
 
 
-def transform_3d(matrix, vector):
+def transform_3d(matrix, vec):
   return tuple(
       sum(
         tuple(
-          matrix[i][j] * vector[j]
+          matrix[i][j] * vec[j]
           for j
-          in range(len(vector))
+          in range(len(vec))
           )
         )
       for i
-      in range(len(vector))
+      in range(len(vec))
       )
 
 
