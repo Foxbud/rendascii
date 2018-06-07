@@ -1,3 +1,10 @@
+"""
+This file is part of RendASCII which is released under MIT.
+See file LICENSE.txt for full license details.
+"""
+
+
+
 from setuptools import Extension, find_packages, setup
 
 
@@ -65,4 +72,5 @@ setup(
     author_email='breadboardfox@gmail.com',
     license='MIT',
     packages=find_packages(),
+    data_files = [("", ["LICENSE.txt"])]
 )

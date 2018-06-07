@@ -6,6 +6,5 @@ dist/
 *.c
 *.so
 *.html
-test/
 build.sh
 .eggs/
