@@ -4,7 +4,7 @@ See file LICENSE.txt for full license details.
 """
 
 
-from rendascii.geometry import matrix, poly2d, poly3d, vec2d, vec3d, vech
+from rendascii.geometry import matrix, polygon, vec2d, vec3d, vech
 from rendascii.geometry import X, Y, Z, W
 
 
@@ -52,7 +52,7 @@ def s2_polygon_shader(in_packet):
   # Perform back-face culling.
   polygon_trunc = tuple(vertex[:W] for vertex in polygon_clip)
   direction = vec3d.dot(
-      poly3d.normal(polygon_trunc),
+      polygon.normal_3d(polygon_trunc),
       vec3d.subtract(
         polygon_trunc[0],
         (0.0, 0.0, 0.0,)
@@ -143,7 +143,7 @@ def s2_polygon_shader(in_packet):
           polys[p],
           texture,
           depths[p],
-          poly2d.generate_aabb(polys[p]),
+          polygon.generate_aabb_2d(polys[p]),
           )
         for p
         in range(len(polys))
@@ -253,23 +253,23 @@ def s3_fragment_shader(in_packet):
     for polygon_packet in polygons:
       # Unpack polygon packet.
       (
-          polygon,
+          poly_verts,
           texture,
           depths,
           aabb
           ) = polygon_packet
       # Determine if polygon contains fragment.
-      if poly2d.aabb_contains_point(
+      if polygon.aabb_contains_point_2d(
           aabb,
           fragment
           ):
-        if poly2d.poly_contains_point(
-            polygon,
+        if polygon.poly_contains_point_2d(
+            poly_verts,
             fragment
             ):
           # Interpolate fragment z depth.
-          depth = poly2d.interpolate_attribute(
-              polygon,
+          depth = polygon.interpolate_attribute_2d(
+              poly_verts,
               depths,
               fragment
               )
@@ -289,7 +289,7 @@ def s3_fragment_shader(in_packet):
           size
           ) = sprite_packet
       # Determine if sprite contains fragment.
-      if poly2d.aabb_contains_point(
+      if polygon.aabb_contains_point_2d(
           aabb,
           fragment
           ):

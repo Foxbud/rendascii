@@ -4,7 +4,6 @@ See file LICENSE.txt for full license details.
 """
 
 
-from rendascii.geometry import poly2d, poly3d
 from rendascii.geometry import Z
 from rendascii.pipeline import shader
 

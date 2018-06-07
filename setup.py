@@ -46,12 +46,8 @@ setup(
         sources=['rendascii/geometry/matrix.py',]
         ),
       Extension(
-        'rendascii.geometry.poly2d',
-        sources=['rendascii/geometry/poly2d.py',]
-        ),
-      Extension(
-        'rendascii.geometry.poly3d',
-        sources=['rendascii/geometry/poly3d.py',]
+        'rendascii.geometry.polygon',
+        sources=['rendascii/geometry/polygon.py',]
         ),
       Extension(
         'rendascii.geometry.vec2d',
