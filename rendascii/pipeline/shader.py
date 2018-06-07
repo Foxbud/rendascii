@@ -4,7 +4,7 @@ See file LICENSE.txt for full license details.
 """
 
 
-from rendascii.geometry import matrix, polygon, vec2d, vec3d, vech
+from rendascii.geometry import matrix, polygon, vector
 from rendascii.geometry import X, Y, Z, W
 
 
@@ -21,13 +21,13 @@ def s1_vertex_shader(in_packet):
   # Transform vertex from model to clip space.
   vert_clip = matrix.transform_3d(
       full_transformation,
-      vech.homogenize(
+      vector.conv_3d_to_h(
         vertex
         )
       )
 
   # Normalize vertex from clip to NDC space.
-  vert_ndc = vech.normalize(vert_clip)
+  vert_ndc = vector.conv_h_to_3d(vert_clip)
 
   # Create output packet.
   out_packet = (
@@ -51,9 +51,9 @@ def s2_polygon_shader(in_packet):
 
   # Perform back-face culling.
   polygon_trunc = tuple(vertex[:W] for vertex in polygon_clip)
-  direction = vec3d.dot(
+  direction = vector.dot(
       polygon.normal_3d(polygon_trunc),
-      vec3d.subtract(
+      vector.subtract(
         polygon_trunc[0],
         (0.0, 0.0, 0.0,)
         )
@@ -96,8 +96,18 @@ def s2_polygon_shader(in_packet):
       i0 = inside[0]
       i1 = inside[1]
       o0 = outside[0]
-      p0 = vech.normalize(vech.project_z(polygon_clip[i0], polygon_clip[o0]))
-      p1 = vech.normalize(vech.project_z(polygon_clip[i1], polygon_clip[o0]))
+      p0 = vector.conv_h_to_3d(
+          vector.project_z_h(
+            polygon_clip[i0],
+            polygon_clip[o0]
+            )
+          )
+      p1 = vector.conv_h_to_3d(
+          vector.project_z_h(
+            polygon_clip[i1],
+            polygon_clip[o0]
+            )
+          )
       # Set packet data.
       polys[0][i0] = polygon_ndc[i0][:Z]
       polys[0][i1] = polygon_ndc[i1][:Z]
@@ -125,8 +135,18 @@ def s2_polygon_shader(in_packet):
       i0 = inside[0]
       o0 = outside[0]
       o1 = outside[1]
-      p0 = vech.normalize(vech.project_z(polygon_clip[i0], polygon_clip[o0]))
-      p1 = vech.normalize(vech.project_z(polygon_clip[i0], polygon_clip[o1]))
+      p0 = vector.conv_h_to_3d(
+          vector.project_z_h(
+            polygon_clip[i0],
+            polygon_clip[o0]
+            )
+          )
+      p1 = vector.conv_h_to_3d(
+          vector.project_z_h(
+            polygon_clip[i0],
+            polygon_clip[o1]
+            )
+          )
       # Set packet data.
       polys[0][i0] = polygon_ndc[i0][:Z]
       polys[0][o0] = p0[:Z]
@@ -169,7 +189,7 @@ def s1_sprite_shader(in_packet):
   # Transform origin from model to camera space.
   origin_camera_h = matrix.transform_3d(
       part_transformation,
-      vech.homogenize(
+      vector.conv_3d_to_h(
         origin
         )
       )
@@ -185,7 +205,7 @@ def s1_sprite_shader(in_packet):
     # Transform bound from model to camera space.
     bound_camera_h = matrix.transform_3d(
         part_transformation,
-        vech.homogenize(
+        vector.conv_3d_to_h(
           bound
           )
         )
@@ -193,11 +213,11 @@ def s1_sprite_shader(in_packet):
     # Reorient and transform bound from camera to clip space.
     bound_clip = matrix.transform_3d(
         projection,
-        vech.add(
+        vector.add(
           origin_camera_h,
           (
             0.0,
-            vech.distance(origin_camera_h, bound_camera_h),
+            vector.distance(origin_camera_h, bound_camera_h),
             0.0,
             0.0,
             )
@@ -205,13 +225,13 @@ def s1_sprite_shader(in_packet):
         )
 
     # Normalize origin from clip to NDC space.
-    origin_ndc = vech.normalize(origin_clip)
+    origin_ndc = vector.conv_h_to_3d(origin_clip)
 
     # Normalize bound from clip to NDC space.
-    bound_ndc = vech.normalize(bound_clip)
+    bound_ndc = vector.conv_h_to_3d(bound_clip)
 
     # Create sprite AABB.
-    half_height = vec3d.distance(bound_ndc, origin_ndc)
+    half_height = vector.distance(bound_ndc, origin_ndc)
     half_width = half_height * len(sprite[0]) / len(sprite) / aspect_ratio
     radius = (half_width, half_height,)
 
@@ -220,10 +240,10 @@ def s1_sprite_shader(in_packet):
         sprite,
         origin_ndc[Z],
         (
-          vec2d.subtract(origin_ndc[:Z], radius),
-          vec2d.add(origin_ndc[:Z], radius),
+          vector.subtract(origin_ndc[:Z], radius),
+          vector.add(origin_ndc[:Z], radius),
           ),
-        vec2d.multiply(radius, 2.0),
+        vector.multiply(radius, 2.0),
         )
 
   return out_packet
@@ -294,7 +314,7 @@ def s3_fragment_shader(in_packet):
           fragment
           ):
         # Interpolate fragment texture.
-        point = vec2d.subtract(fragment, aabb[0])
+        point = vector.subtract(fragment, aabb[0])
         x = int(point[X] / size[X] * len(sprite[0]))
         y = int(point[Y] / size[Y] * len(sprite))
         texture = sprite[y][x]

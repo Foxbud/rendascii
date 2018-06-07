@@ -5,7 +5,6 @@ See file LICENSE.txt for full license details.
 
 
 import json
-from rendascii.geometry import vec2d, vec3d
 from rendascii.geometry import X, Y
 
 

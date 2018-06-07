@@ -50,16 +50,8 @@ setup(
         sources=['rendascii/geometry/polygon.py',]
         ),
       Extension(
-        'rendascii.geometry.vec2d',
-        sources=['rendascii/geometry/vec2d.py',]
-        ),
-      Extension(
-        'rendascii.geometry.vec3d',
-        sources=['rendascii/geometry/vec3d.py',]
-        ),
-      Extension(
-        'rendascii.geometry.vech',
-        sources=['rendascii/geometry/vech.py',]
+        'rendascii.geometry.vector',
+        sources=['rendascii/geometry/vector.py',]
         ),
       ],
     description='ASCII 3D rendering engine',

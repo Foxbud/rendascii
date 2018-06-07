@@ -4,7 +4,7 @@ See file LICENSE.txt for full license details.
 """
 
 
-from rendascii.geometry import vec3d
+from rendascii.geometry import vector
 from rendascii.geometry import X, Y, Z
 
 
@@ -68,9 +68,9 @@ def interpolate_attribute_2d(poly, attributes, point):
 # 3D polygon functions.
 
 def normal_3d(poly):
-  return vec3d.cross(
-      vec3d.subtract(poly[1], poly[0]), 
-      vec3d.subtract(poly[2], poly[0])
+  return vector.cross_3d(
+      vector.subtract(poly[1], poly[0]), 
+      vector.subtract(poly[2], poly[0])
       )
 
 

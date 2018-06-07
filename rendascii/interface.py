@@ -6,7 +6,7 @@ See file LICENSE.txt for full license details.
 import math
 from multiprocessing import Pool
 from rendascii import resource
-from rendascii.geometry import matrix, vec3d
+from rendascii.geometry import matrix
 from rendascii.geometry import X, Y
 from rendascii.pipeline import stage
 
