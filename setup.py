@@ -4,56 +4,59 @@ See file LICENSE.txt for full license details.
 """
 
 
-
+from Cython.Build import cythonize
 from setuptools import Extension, find_packages, setup
+
+
+ext_modules = [
+    Extension(
+      'rendascii.interface',
+      sources=['rendascii/interface.py',],
+      extra_compile_args=['-O1',]
+      ),
+    Extension(
+      'rendascii.resource',
+      sources=['rendascii/resource.py',],
+      extra_compile_args=['-O1',]
+      ),
+    Extension(
+      'rendascii.pipeline.shader',
+      sources=['rendascii/pipeline/shader.py',],
+      extra_compile_args=['-O1',]
+      ),
+    Extension(
+      'rendascii.pipeline.stage',
+      sources=['rendascii/pipeline/stage.py',],
+      extra_compile_args=['-O1',]
+      ),
+    Extension(
+      'rendascii.geometry.matrix',
+      sources=['rendascii/geometry/matrix.py',],
+      extra_compile_args=['-O1',]
+      ),
+    Extension(
+      'rendascii.geometry.polygon',
+      sources=['rendascii/geometry/polygon.py',],
+      extra_compile_args=['-O1',]
+      ),
+    Extension(
+      'rendascii.geometry.vector',
+      sources=['rendascii/geometry/vector.py',],
+      extra_compile_args=['-O1',]
+      ),
+    ]
 
 
 setup(
     name='rendascii',
     use_scm_version=True,
+    ext_modules=cythonize(
+      ext_modules,
+      compiler_directives={
+        'embedsignature': True,
+        }
+      ),
     setup_requires=['setuptools_scm', 'cython',],
-    ext_modules=[
-      Extension(
-        'rendascii.__init__',
-        sources=['rendascii/__init__.py',]
-        ),
-      Extension(
-        'rendascii.interface',
-        sources=['rendascii/interface.py',]
-        ),
-      Extension(
-        'rendascii.resource',
-        sources=['rendascii/resource.py',]
-        ),
-      Extension(
-        'rendascii.pipeline.__init__',
-        sources=['rendascii/pipeline/__init__.py',]
-        ),
-      Extension(
-        'rendascii.pipeline.shader',
-        sources=['rendascii/pipeline/shader.py',]
-        ),
-      Extension(
-        'rendascii.pipeline.stage',
-        sources=['rendascii/pipeline/stage.py',]
-        ),
-      Extension(
-        'rendascii.geometry.__init__',
-        sources=['rendascii/geometry/__init__.py',]
-        ),
-      Extension(
-        'rendascii.geometry.matrix',
-        sources=['rendascii/geometry/matrix.py',]
-        ),
-      Extension(
-        'rendascii.geometry.polygon',
-        sources=['rendascii/geometry/polygon.py',]
-        ),
-      Extension(
-        'rendascii.geometry.vector',
-        sources=['rendascii/geometry/vector.py',]
-        ),
-      ],
     description='ASCII 3D rendering engine',
     url='https://bitbucket.org/foxbudpersonal/rendascii',
     author='Garrett Fairburn',
