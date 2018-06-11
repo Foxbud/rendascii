@@ -6,8 +6,9 @@ See file LICENSE.txt for full license details.
 import math
 from multiprocessing import Pool
 from rendascii import resource
+from rendascii.geometry import AXIS_NORMALS, X, Y
 from rendascii.geometry import matrix
-from rendascii.geometry import X, Y
+from rendascii.geometry import vector
 from rendascii.pipeline import stage
 
 
@@ -335,3 +336,82 @@ class ModelInstance:
 
   def unhide(self):
     self._hidden = False
+
+
+class Transformer:
+
+  def __init__(self, inverse=False):
+    # Initialize instance attributes.
+    self._inverse = inverse
+    self._transformation = matrix.IDENTITY_3D
+    self.AXIS_NORMALS = AXIS_NORMALS
+
+  def scale(self, scalar):
+    if self._inverse:
+      self._transformation = matrix.compose(
+          self._transformation,
+          matrix.scaling_3d(
+            1.0 / scalar
+            )
+          )
+    else:
+      self._transformation = matrix.compose(
+          matrix.scaling_3d(
+            scalar
+            ),
+          self._transformation
+          )
+
+    # Return self for convenience.
+    return self
+
+  def translate(self, vec):
+    if self._inverse:
+      self._transformation = matrix.compose(
+          self._transformation,
+          matrix.translation_3d(
+            vector.negate(
+              vec
+              )
+            )
+          )
+    else:
+      self._transformation = matrix.compose(
+          matrix.translation_3d(
+            vec
+            ),
+          self._transformation
+          )
+
+    # Return self for convenience.
+    return self
+
+  def rotate(self, theta, axis_normal):
+    if self._inverse:
+      self._transformation = matrix.compose(
+          self._transformation,
+          matrix.rotation_3d(
+            -theta,
+            axis_normal
+            )
+          )
+    else:
+      self._transformation = matrix.compose(
+          matrix.rotation_3d(
+            theta,
+            axis_normal
+            ),
+          self._transformation
+          )
+
+    # Return self for convenience.
+    return self
+
+  def clear(self):
+    self._transformation = matrix.IDENTITY_3D
+
+    # Return self for convenience.
+    return self
+
+  def get_transformation(self):
+    return self._transformation

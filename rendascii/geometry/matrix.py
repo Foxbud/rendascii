@@ -69,11 +69,11 @@ def scaling_3d(scalar):
       )
 
 
-def translation_3d(vector):
+def translation_3d(vec):
   return (
-      (1.0, 0.0, 0.0, vector[X],),
-      (0.0, 1.0, 0.0, vector[Y],),
-      (0.0, 0.0, 1.0, vector[Z],),
+      (1.0, 0.0, 0.0, vec[X],),
+      (0.0, 1.0, 0.0, vec[Y],),
+      (0.0, 0.0, 1.0, vec[Z],),
       (0.0, 0.0, 0.0, 1.0,),
       )
 
