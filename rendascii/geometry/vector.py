@@ -80,22 +80,17 @@ def cross_3d(vec_a, vec_b):
 
 # Homogenous vector functions.
 
-def project_z_h(vec, focus, ):
-  ratio = -focus[Z] / (
-      vec[Z] - focus[Z]
-      )
-  return (
-      focus[X] + ratio * (
-        vec[X] - focus[X]
-        ),
-      focus[Y] + ratio * (
-        vec[Y] - focus[Y]
-        ),
-      0.0,
-      focus[W] + ratio * (
-        vec[W] - focus[W]
-        ),
-      )
+def project_h(vec, focus, axis, offset):
+  ratio = (focus[axis] - offset) / (focus[axis] - vec[axis])
+  if ratio < 0.0:
+      ratio = -ratio
+  return tuple(
+          focus[c] - ratio * (focus[c] - vec[c])
+          if c != axis else
+          0.0
+          for c
+          in range(4)
+          )
 
 
 # Vector conversion functions.

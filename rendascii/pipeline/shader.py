@@ -96,15 +96,19 @@ def s2_polygon_shader(in_packet):
       i1 = inside[1]
       o0 = outside[0]
       p0 = vector.conv_h_to_3d(
-          vector.project_z_h(
+          vector.project_h(
             polygon_clip[i0],
-            polygon_clip[o0]
+            polygon_clip[o0],
+            Z,
+            0.0
             )
           )
       p1 = vector.conv_h_to_3d(
-          vector.project_z_h(
+          vector.project_h(
             polygon_clip[i1],
-            polygon_clip[o0]
+            polygon_clip[o0],
+            Z,
+            0.0
             )
           )
       # Set packet data.
@@ -135,15 +139,19 @@ def s2_polygon_shader(in_packet):
       o0 = outside[0]
       o1 = outside[1]
       p0 = vector.conv_h_to_3d(
-          vector.project_z_h(
+          vector.project_h(
             polygon_clip[i0],
-            polygon_clip[o0]
+            polygon_clip[o0],
+            Z,
+            0.0
             )
           )
       p1 = vector.conv_h_to_3d(
-          vector.project_z_h(
+          vector.project_h(
             polygon_clip[i0],
-            polygon_clip[o1]
+            polygon_clip[o1],
+            Z,
+            0.0
             )
           )
       # Set packet data.

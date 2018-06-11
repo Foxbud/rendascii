@@ -78,10 +78,10 @@ def translation_3d(vector):
       )
 
 
-def rotation_3d(theta, axis):
-  x = axis[X]
-  y = axis[Y]
-  z = axis[Z]
+def rotation_3d(theta, axis_normal):
+  x = axis_normal[X]
+  y = axis_normal[Y]
+  z = axis_normal[Z]
   s = math.sin(theta)
   c = math.cos(theta)
   o = (1 - c)

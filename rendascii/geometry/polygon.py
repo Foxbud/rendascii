@@ -74,6 +74,12 @@ def normal_3d(poly):
       )
 
 
+# Homogenous polygon functions.
+
+def f_cull_h():
+  pass
+
+
 # Helper functions.
 
 def _edge_2d(vec, line_s, line_e):
