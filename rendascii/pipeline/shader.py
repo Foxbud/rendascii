@@ -26,13 +26,9 @@ def s1_vertex_shader(in_packet):
         )
       )
 
-  # Normalize vertex from clip to NDC space.
-  vert_ndc = vector.conv_h_to_3d(vert_clip)
-
   # Create output packet.
   out_packet = (
       vert_clip,
-      vert_ndc,
       )
 
   return out_packet
@@ -44,136 +40,48 @@ def s2_polygon_shader(in_packet):
 
   # Unpack input packet.
   (
-      polygon_clip,
-      polygon_ndc,
+      poly_clip,
       texture
       ) = in_packet
 
   # Perform back-face culling.
-  polygon_trunc = tuple(vertex[:W] for vertex in polygon_clip)
+  poly_trunc = tuple(vertex[:W] for vertex in poly_clip)
   direction = vector.dot(
       polygon.normal_3d(
-        polygon_trunc
+        poly_trunc
         ),
-      polygon_trunc[0],
+      poly_trunc[0],
       )
   if direction <= 0.0:
-    # Declare packet data.
-    polys = []
+    # Declare output data.
+    out_polys = []
     depths = []
 
     # Perform frustum culling.
-    inside = []
-    outside = []
-    for v in range(len(polygon_clip)):
-      if polygon_clip[v][Z] < 0.0:
-        outside.append(v)
-      else:
-        inside.append(v)
-
-    # No vertices outside.
-    if len(outside) == 0:
-      # Initialize packet data.
-      polys = [[None,] * 3,]
-      depths = [[None,] * 3,]
-      # Set packet data.
-      polys[0][0] = polygon_ndc[0][:Z]
-      polys[0][1] = polygon_ndc[1][:Z]
-      polys[0][2] = polygon_ndc[2][:Z]
-      polys[0] = tuple(polys[0])
-      depths[0][0] = polygon_ndc[0][Z]
-      depths[0][1] = polygon_ndc[1][Z]
-      depths[0][2] = polygon_ndc[2][Z]
-      depths[0] = tuple(depths[0])
-
-    # One vertex outside.
-    elif len(outside) == 1:
-      # Initialize packet data.
-      polys = [[None,] * 3,] * 2
-      depths = [[None,] * 3,] * 2
-      # Calculate new polygons.
-      i0 = inside[0]
-      i1 = inside[1]
-      o0 = outside[0]
-      p0 = vector.conv_h_to_3d(
-          vector.project(
-            polygon_clip[i0],
-            polygon_clip[o0],
-            Z,
-            0.0
-            )
-          )
-      p1 = vector.conv_h_to_3d(
-          vector.project(
-            polygon_clip[i1],
-            polygon_clip[o0],
-            Z,
-            0.0
-            )
-          )
-      # Set packet data.
-      polys[0][i0] = polygon_ndc[i0][:Z]
-      polys[0][i1] = polygon_ndc[i1][:Z]
-      polys[0][o0] = p1[:Z]
-      polys[0] = tuple(polys[0])
-      depths[0][i0] = polygon_ndc[i0][Z]
-      depths[0][i1] = polygon_ndc[i1][Z]
-      depths[0][o0] = 0.0
-      depths[0] = tuple(depths[0])
-      polys[1][i0] = polygon_ndc[i0][:Z]
-      polys[1][i1] = p0[:Z]
-      polys[1][o0] = p1[:Z]
-      polys[1] = tuple(polys[1])
-      depths[1][i0] = polygon_ndc[i0][Z]
-      depths[1][i1] = 0.0
-      depths[1][o0] = 0.0
-      depths[1] = tuple(depths[1])
-
-    # Two vertices outside.
-    elif len(outside) == 2:
-      # Initialize packet data.
-      polys = [[None,] * 3,]
-      depths = [[None,] * 3,]
-      # Calculate new polygon.
-      i0 = inside[0]
-      o0 = outside[0]
-      o1 = outside[1]
-      p0 = vector.conv_h_to_3d(
-          vector.project(
-            polygon_clip[i0],
-            polygon_clip[o0],
-            Z,
-            0.0
-            )
-          )
-      p1 = vector.conv_h_to_3d(
-          vector.project(
-            polygon_clip[i0],
-            polygon_clip[o1],
-            Z,
-            0.0
-            )
-          )
-      # Set packet data.
-      polys[0][i0] = polygon_ndc[i0][:Z]
-      polys[0][o0] = p0[:Z]
-      polys[0][o1] = p1[:Z]
-      polys[0] = tuple(polys[0])
-      depths[0][i0] = polygon_ndc[i0][Z]
-      depths[0][o0] = 0.0
-      depths[0][o1] = 0.0
-      depths[0] = tuple(depths[0])
+    # Near clipping plane.
+    tmp_polys = polygon.f_cull_h(poly_clip, Z, 0.0)
+    # Transform polygons from clip to ndc space.
+    for p in range(len(tmp_polys)):
+      tmp_poly = [None,] * 3
+      tmp_depths = [None,] * 3
+      for v in range(len(3)):
+        v_3d = vector.conv_h_to_3d(tmp_polys[p][v])
+        v_2d = vector.conv_3d_to_2d(v_3d)
+        tmp_poly[v] = v_2d
+        tmp_depths = v_3d[Z]
+      out_polys.append(tmp_poly)
+      depths.append(tmp_depths)
 
     # Create output packet.
     out_packet = tuple(
         (
-          polys[p],
+          out_polys[p],
           texture,
           depths[p],
-          polygon.generate_aabb_2d(polys[p]),
+          polygon.generate_aabb_2d(out_polys[p]),
           )
         for p
-        in range(len(polys))
+        in range(len(out_polys))
         )
 
   return out_packet

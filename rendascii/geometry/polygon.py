@@ -76,11 +76,98 @@ def normal_3d(poly):
 
 # Homogenous polygon functions.
 
-def f_cull_h():
-  pass
+def f_cull_h(poly, axis, offset, negative=False):
+  # Determine which vertices are outside the clipping plane.
+  inside = []
+  outside = []
+  for v in range(len(poly)):
+    if poly[v][axis] < offset:
+      outside.append(v)
+    else:
+      inside.append(v)
+  if negative:
+    tmp = inside
+    inside = outside
+    outside = tmp
+
+  # Declare output polygons.
+  out_polys = []
+  # No vertices outside.
+  if len(outside) == 0:
+    out_polys = [poly,]
+  # One vertex outside.
+  elif len(outside) == 1:
+    out_polys = _f_cull_1(poly, axis, offset, inside, outside)
+  # Two vertices outside.
+  elif len(outside) == 2:
+    out_polys = _f_cull_2(poly, axis, offset, inside, outside)
+
+  return out_polys
 
 
 # Helper functions.
+
+def _f_cull_1(poly, axis, offset, inside, outside):
+  # Initialize output polygons.
+  out_polys = [[None,] * 3,] * 2
+
+  # Calculate output polygons.
+  i0 = inside[0]
+  i1 = inside[1]
+  o0 = outside[0]
+  p0 = vector.project(
+      poly[i0],
+      poly[o0],
+      axis,
+      offset
+      )
+  p1 = vector.project(
+      poly[i1],
+      poly[o0],
+      axis,
+      offset
+      )
+  # Set output polygons.
+  out_polys[0][i0] = poly[i0]
+  out_polys[0][i1] = poly[i1]
+  out_polys[0][o0] = p1
+  out_polys[0] = tuple(out_polys[0])
+  out_polys[1][i0] = poly[i0]
+  out_polys[1][i1] = p0
+  out_polys[1][o0] = p1
+  out_polys[1] = tuple(out_polys[1])
+  
+  return out_polys
+
+
+def _f_cull_2(poly, axis, offset, inside, outside):
+  # Initialize output polygons.
+  out_polys = [[None,] * 3,]
+
+  # Calculate output polygon.
+  i0 = inside[0]
+  o0 = outside[0]
+  o1 = outside[1]
+  p0 = vector.project(
+      poly[i0],
+      poly[o0],
+      axis,
+      offset
+      )
+  p1 = vector.project(
+      poly[i0],
+      poly[o1],
+      axis,
+      offset
+      )
+  # Set packet data.
+  out_polys[0][i0] = poly[i0][:Z]
+  out_polys[0][o0] = p0[:Z]
+  out_polys[0][o1] = p1[:Z]
+  out_polys[0] = tuple(out_polys[0])
+
+  return out_polys
+
 
 def _edge_2d(vec, line_s, line_e):
   # Check which side of line a vector lies on (sign).

@@ -158,11 +158,6 @@ def sync_one(in_data):
           in_vertex_data[polygon_packet[0][1]][0],
           in_vertex_data[polygon_packet[0][2]][0],
           ),
-        (
-          in_vertex_data[polygon_packet[0][0]][1],
-          in_vertex_data[polygon_packet[0][1]][1],
-          in_vertex_data[polygon_packet[0][2]][1],
-          ),
         polygon_packet[1],
         )
       for polygon_packet

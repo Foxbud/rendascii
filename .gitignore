@@ -10,3 +10,4 @@ build.sh
 .eggs/
 *~
 *.swo
+test/
