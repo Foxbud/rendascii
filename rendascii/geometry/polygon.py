@@ -161,9 +161,9 @@ def _f_cull_2(poly, axis, offset, inside, outside):
       offset
       )
   # Set packet data.
-  out_polys[0][i0] = poly[i0][:Z]
-  out_polys[0][o0] = p0[:Z]
-  out_polys[0][o1] = p1[:Z]
+  out_polys[0][i0] = poly[i0]
+  out_polys[0][o0] = p0
+  out_polys[0][o1] = p1
   out_polys[0] = tuple(out_polys[0])
 
   return out_polys

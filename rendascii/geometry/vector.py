@@ -75,7 +75,7 @@ def project(vec, focus, axis, offset):
   return tuple(
           focus[c] - ratio * (focus[c] - vec[c])
           if c != axis else
-          0.0
+          offset
           for c
           in range(len(vec))
           )

@@ -60,15 +60,21 @@ def s2_polygon_shader(in_packet):
     # Perform frustum culling.
     # Near clipping plane.
     tmp_polys = polygon.f_cull_h(poly_clip, Z, 0.0)
+    culled_polys = tmp_polys
+    # Far clipping plane.
+    tmp_polys = []
+    for poly in culled_polys:
+      tmp_polys += polygon.f_cull_h(poly, Z, 100.0, negative=True)
+    culled_polys = tmp_polys
     # Transform polygons from clip to ndc space.
-    for p in range(len(tmp_polys)):
+    for p in range(len(culled_polys)):
       tmp_poly = [None,] * 3
       tmp_depths = [None,] * 3
-      for v in range(len(3)):
-        v_3d = vector.conv_h_to_3d(tmp_polys[p][v])
+      for v in range(3):
+        v_3d = vector.conv_h_to_3d(culled_polys[p][v])
         v_2d = vector.conv_3d_to_2d(v_3d)
         tmp_poly[v] = v_2d
-        tmp_depths = v_3d[Z]
+        tmp_depths[v] = v_3d[Z]
       out_polys.append(tmp_poly)
       depths.append(tmp_depths)
 
