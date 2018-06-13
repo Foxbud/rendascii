@@ -3,6 +3,7 @@ This file is part of RendASCII which is released under MIT.
 See file LICENSE.txt for full license details.
 """
 
+
 import math
 from multiprocessing import Pool
 from rendascii import resource
@@ -344,7 +345,6 @@ class Transformer:
     # Initialize instance attributes.
     self._inverse = inverse
     self._transformation = matrix.IDENTITY_3D
-    self.AXIS_NORMALS = AXIS_NORMALS
 
   def scale(self, scalar):
     if self._inverse:
@@ -406,6 +406,16 @@ class Transformer:
 
     # Return self for convenience.
     return self
+
+  def apply(self, vec):
+    return vector.conv_h_to_3d(
+        matrix.transform_3d(
+          self._transformation,
+          vector.conv_3d_h(
+            vec
+            )
+          )
+        )
 
   def clear(self):
     self._transformation = matrix.IDENTITY_3D

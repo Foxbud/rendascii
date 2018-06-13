@@ -96,7 +96,7 @@ def s2_polygon_shader(in_packet):
       i1 = inside[1]
       o0 = outside[0]
       p0 = vector.conv_h_to_3d(
-          vector.project_h(
+          vector.project(
             polygon_clip[i0],
             polygon_clip[o0],
             Z,
@@ -104,7 +104,7 @@ def s2_polygon_shader(in_packet):
             )
           )
       p1 = vector.conv_h_to_3d(
-          vector.project_h(
+          vector.project(
             polygon_clip[i1],
             polygon_clip[o0],
             Z,
@@ -139,7 +139,7 @@ def s2_polygon_shader(in_packet):
       o0 = outside[0]
       o1 = outside[1]
       p0 = vector.conv_h_to_3d(
-          vector.project_h(
+          vector.project(
             polygon_clip[i0],
             polygon_clip[o0],
             Z,
@@ -147,7 +147,7 @@ def s2_polygon_shader(in_packet):
             )
           )
       p1 = vector.conv_h_to_3d(
-          vector.project_h(
+          vector.project(
             polygon_clip[i0],
             polygon_clip[o1],
             Z,
