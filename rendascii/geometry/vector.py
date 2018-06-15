@@ -68,19 +68,6 @@ def distance(vec_b, vec_a):
       )
 
 
-def project(vec, focus, axis, offset):
-  ratio = (focus[axis] - offset) / (focus[axis] - vec[axis])
-  if ratio < 0.0:
-      ratio = -ratio
-  return tuple(
-          focus[c] - ratio * (focus[c] - vec[c])
-          if c != axis else
-          offset
-          for c
-          in range(len(vec))
-          )
-
-
 # 3D vector functions.
 
 def cross_3d(vec_a, vec_b):
@@ -89,6 +76,17 @@ def cross_3d(vec_a, vec_b):
       vec_a[Z] * vec_b[X] - vec_a[X] * vec_b[Z],
       vec_a[X] * vec_b[Y] - vec_a[Y] * vec_b[X],
       )
+
+
+# Homogeneous vector functions.
+
+def project_h(vec, focus, plane_n, plane_v):
+  u = subtract(vec, focus)
+  direction = dot(plane_n, u)
+  w = subtract(focus, plane_v)
+  ratio = -dot(plane_n, w) / direction
+  u = multiply(u, ratio)
+  return add(focus, u)
 
 
 # Vector conversion functions.

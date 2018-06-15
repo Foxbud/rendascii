@@ -5,7 +5,7 @@ See file LICENSE.txt for full license details.
 
 
 from rendascii.geometry import matrix, polygon, vector
-from rendascii.geometry import X, Y, Z, W
+from rendascii.geometry import NORMAL, POINT, X, Y, Z, W
 
 
 def s1_vertex_shader(in_packet):
@@ -41,7 +41,9 @@ def s2_polygon_shader(in_packet):
   # Unpack input packet.
   (
       poly_clip,
-      texture
+      texture,
+      near_plane,
+      far_plane,
       ) = in_packet
 
   # Perform back-face culling.
@@ -59,12 +61,20 @@ def s2_polygon_shader(in_packet):
 
     # Perform frustum culling.
     # Near clipping plane.
-    tmp_polys = polygon.f_cull_h(poly_clip, Z, 0.0)
+    tmp_polys = polygon.f_cull_h(
+        poly_clip,
+        near_plane[NORMAL],
+        near_plane[POINT],
+        )
     culled_polys = tmp_polys
     # Far clipping plane.
     tmp_polys = []
     for poly in culled_polys:
-      tmp_polys += polygon.f_cull_h(poly, Z, 100.0, negative=True)
+      tmp_polys += polygon.f_cull_h(
+          poly,
+          far_plane[NORMAL],
+          far_plane[POINT]
+          )
     culled_polys = tmp_polys
     # Transform polygons from clip to ndc space.
     for p in range(len(culled_polys)):

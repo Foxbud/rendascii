@@ -76,19 +76,23 @@ def normal_3d(poly):
 
 # Homogenous polygon functions.
 
-def f_cull_h(poly, axis, offset, negative=False):
+def f_cull_h(poly, plane_n, plane_v):
   # Determine which vertices are outside the clipping plane.
   inside = []
   outside = []
   for v in range(len(poly)):
-    if poly[v][axis] < offset:
+    if (
+        vector.dot(
+          plane_n,
+          vector.subtract(
+            poly[v],
+            plane_v
+            )
+          ) < 0.0
+        ):
       outside.append(v)
     else:
       inside.append(v)
-  if negative:
-    tmp = inside
-    inside = outside
-    outside = tmp
 
   # Declare output polygons.
   out_polys = []
@@ -97,17 +101,17 @@ def f_cull_h(poly, axis, offset, negative=False):
     out_polys = [poly,]
   # One vertex outside.
   elif len(outside) == 1:
-    out_polys = _f_cull_1(poly, axis, offset, inside, outside)
+    out_polys = _f_cull_1(poly, plane_n, plane_v, inside, outside)
   # Two vertices outside.
   elif len(outside) == 2:
-    out_polys = _f_cull_2(poly, axis, offset, inside, outside)
+    out_polys = _f_cull_2(poly, plane_n, plane_v, inside, outside)
 
   return out_polys
 
 
 # Helper functions.
 
-def _f_cull_1(poly, axis, offset, inside, outside):
+def _f_cull_1(poly, plane_n, plane_v, inside, outside):
   # Initialize output polygons.
   out_polys = [[None,] * 3,] * 2
 
@@ -115,17 +119,17 @@ def _f_cull_1(poly, axis, offset, inside, outside):
   i0 = inside[0]
   i1 = inside[1]
   o0 = outside[0]
-  p0 = vector.project(
+  p0 = vector.project_h(
       poly[i0],
       poly[o0],
-      axis,
-      offset
+      plane_n,
+      plane_v
       )
-  p1 = vector.project(
+  p1 = vector.project_h(
       poly[i1],
       poly[o0],
-      axis,
-      offset
+      plane_n,
+      plane_v
       )
   # Set output polygons.
   out_polys[0][i0] = poly[i0]
@@ -140,7 +144,7 @@ def _f_cull_1(poly, axis, offset, inside, outside):
   return out_polys
 
 
-def _f_cull_2(poly, axis, offset, inside, outside):
+def _f_cull_2(poly, plane_n, plane_v, inside, outside):
   # Initialize output polygons.
   out_polys = [[None,] * 3,]
 
@@ -148,17 +152,17 @@ def _f_cull_2(poly, axis, offset, inside, outside):
   i0 = inside[0]
   o0 = outside[0]
   o1 = outside[1]
-  p0 = vector.project(
+  p0 = vector.project_h(
       poly[i0],
       poly[o0],
-      axis,
-      offset
+      plane_n,
+      plane_v
       )
-  p1 = vector.project(
+  p1 = vector.project_h(
       poly[i0],
       poly[o1],
-      axis,
-      offset
+      plane_n,
+      plane_v
       )
   # Set packet data.
   out_polys[0][i0] = poly[i0]

@@ -214,6 +214,8 @@ class Engine:
                 polygons[polygon][2] + vert_offset,
                 ),
               colormap[colors[polygon]],
+              camera._near_plane,
+              camera._far_plane,
               )
             for polygon
             in range(len(polygons))
@@ -290,6 +292,34 @@ class Camera:
         ()
         )
     self._transformation = matrix.IDENTITY_3D
+    self._near_plane = (
+        (
+          0.0,
+          0.0,
+          near,
+          0.0,
+          ),
+        (
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          ),
+        )
+    self._far_plane = (
+        (
+          0.0,
+          0.0,
+          far,
+          0.0,
+          ),
+        (
+          0.0,
+          0.0,
+          -1.0,
+          0.0,
+          ),
+        )
 
   def set_transformation(self, transformation):
     self._transformation = transformation
