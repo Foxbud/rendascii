@@ -8,25 +8,6 @@ import json
 from rendascii.geometry import X, Y
 
 
-def generate_camera_fragments(resolution):
-  frag_size = (2 / resolution[X], 2 / resolution[Y],)
-
-  fragments = tuple(
-      tuple(
-        (
-          -1 + frag_size[X] * (x + 0.5),
-          -1 + frag_size[Y] * (y + 0.5),
-          )
-        for x
-        in range(resolution[X])
-        )
-      for y
-      in range(resolution[Y])
-      )
-  
-  return fragments
-
-
 def load_colormap(colormap_filename, colormap_dir):
   # Open file.
   with open(colormap_dir + colormap_filename, 'r') as f_in:

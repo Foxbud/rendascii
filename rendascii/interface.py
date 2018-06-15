@@ -214,8 +214,7 @@ class Engine:
                 polygons[polygon][2] + vert_offset,
                 ),
               colormap[colors[polygon]],
-              camera._near_plane,
-              camera._far_plane,
+              camera._view_frustum,
               )
             for polygon
             in range(len(polygons))
@@ -288,41 +287,69 @@ class Camera:
     self._ratio = ratio
     self._projection = matrix.projection_3d(near, far, fov, ratio)
     self._fragments = sum(
-        resource.generate_camera_fragments(resolution),
+        self._gen_fragments(resolution),
         ()
         )
     self._transformation = matrix.IDENTITY_3D
-    self._near_plane = (
+    vert_theta = (math.pi - fov) / 2.0
+    vert_y = math.sin(vert_theta)
+    vert_z = math.cos(vert_theta)
+    horz_theta = ratio * vert_theta
+    horz_x = math.sin(vert_theta)
+    horz_z = math.cos(vert_theta)
+    self._view_frustum = (
+        # Near plane.
         (
-          0.0,
-          0.0,
-          near,
-          0.0,
+          (0.0, 0.0, 0.0, 0.0,),
+          (0.0, 0.0, 1.0, 0.0,),
           ),
+        # Far plane.
         (
-          0.0,
-          0.0,
-          1.0,
-          0.0,
+          (0.0, 0.0, far - near, 0.0,),
+          (0.0, 0.0, -1.0, 0.0,),
           ),
-        )
-    self._far_plane = (
+        # North plane.
         (
-          0.0,
-          0.0,
-          far,
-          0.0,
+          (0.0, 0.0, -near, 0.0,),
+          (0.0, -vert_y, vert_z, 0.0,),
           ),
+        # South plane.
         (
-          0.0,
-          0.0,
-          -1.0,
-          0.0,
+          (0.0, 0.0, -near, 0.0,),
+          (0.0, vert_y, vert_z, 0.0,),
+          ),
+        # East plane.
+        (
+          (0.0, 0.0, -near, 0.0,),
+          (-horz_x, 0.0, horz_z, 0.0,),
+          ),
+        # West plane.
+        (
+          (0.0, 0.0, -near, 0.0,),
+          (horz_x, 0.0, horz_z, 0.0,),
           ),
         )
 
   def set_transformation(self, transformation):
     self._transformation = transformation
+
+  def _gen_fragments(self, resolution):
+    frag_size = (2 / resolution[X], 2 / resolution[Y],)
+  
+    fragments = tuple(
+        tuple(
+          (
+            -1 + frag_size[X] * (x + 0.5),
+            -1 + frag_size[Y] * (y + 0.5),
+            )
+          for x
+          in range(resolution[X])
+          )
+        for y
+        in range(resolution[Y])
+        )
+    
+    return fragments
 
 
 class SpriteInstance:

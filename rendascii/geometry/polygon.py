@@ -5,6 +5,7 @@ See file LICENSE.txt for full license details.
 
 
 from rendascii.geometry import vector
+from rendascii.geometry import PLANE_NORMAL, PLANE_POINT
 from rendascii.geometry import X, Y, Z
 
 
@@ -76,17 +77,17 @@ def normal_3d(poly):
 
 # Homogenous polygon functions.
 
-def f_cull_h(poly, plane_n, plane_v):
+def f_cull_h(poly, plane):
   # Determine which vertices are outside the clipping plane.
   inside = []
   outside = []
   for v in range(len(poly)):
     if (
         vector.dot(
-          plane_n,
+          plane[PLANE_NORMAL],
           vector.subtract(
             poly[v],
-            plane_v
+            plane[PLANE_POINT]
             )
           ) < 0.0
         ):
@@ -101,17 +102,17 @@ def f_cull_h(poly, plane_n, plane_v):
     out_polys = [poly,]
   # One vertex outside.
   elif len(outside) == 1:
-    out_polys = _f_cull_1(poly, plane_n, plane_v, inside, outside)
+    out_polys = _f_cull_1(poly, plane, inside, outside)
   # Two vertices outside.
   elif len(outside) == 2:
-    out_polys = _f_cull_2(poly, plane_n, plane_v, inside, outside)
+    out_polys = _f_cull_2(poly, plane, inside, outside)
 
   return out_polys
 
 
 # Helper functions.
 
-def _f_cull_1(poly, plane_n, plane_v, inside, outside):
+def _f_cull_1(poly, plane, inside, outside):
   # Initialize output polygons.
   out_polys = [[None,] * 3,] * 2
 
@@ -122,14 +123,12 @@ def _f_cull_1(poly, plane_n, plane_v, inside, outside):
   p0 = vector.project_h(
       poly[i0],
       poly[o0],
-      plane_n,
-      plane_v
+      plane
       )
   p1 = vector.project_h(
       poly[i1],
       poly[o0],
-      plane_n,
-      plane_v
+      plane
       )
   # Set output polygons.
   out_polys[0][i0] = poly[i0]
@@ -144,7 +143,7 @@ def _f_cull_1(poly, plane_n, plane_v, inside, outside):
   return out_polys
 
 
-def _f_cull_2(poly, plane_n, plane_v, inside, outside):
+def _f_cull_2(poly, plane, inside, outside):
   # Initialize output polygons.
   out_polys = [[None,] * 3,]
 
@@ -155,14 +154,12 @@ def _f_cull_2(poly, plane_n, plane_v, inside, outside):
   p0 = vector.project_h(
       poly[i0],
       poly[o0],
-      plane_n,
-      plane_v
+      plane
       )
   p1 = vector.project_h(
       poly[i0],
       poly[o1],
-      plane_n,
-      plane_v
+      plane
       )
   # Set packet data.
   out_polys[0][i0] = poly[i0]

@@ -10,8 +10,8 @@ AXIS_NORMALS = (
     (0.0, 1.0, 0.0,),
     (0.0, 0.0, 1.0,),
     )
-NORMAL = 1
-POINT = 0
+PLANE_NORMAL = 1
+PLANE_POINT = 0
 X = 0
 Y = 1
 Z = 2

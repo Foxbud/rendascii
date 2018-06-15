@@ -5,6 +5,7 @@ See file LICENSE.txt for full license details.
 
 
 import math
+from rendascii.geometry import PLANE_NORMAL, PLANE_POINT
 from rendascii.geometry import X, Y, Z, W
 
 
@@ -80,11 +81,11 @@ def cross_3d(vec_a, vec_b):
 
 # Homogeneous vector functions.
 
-def project_h(vec, focus, plane_n, plane_v):
+def project_h(vec, focus, plane):
   u = subtract(vec, focus)
-  direction = dot(plane_n, u)
-  w = subtract(focus, plane_v)
-  ratio = -dot(plane_n, w) / direction
+  direction = dot(plane[PLANE_NORMAL], u)
+  w = subtract(focus, plane[PLANE_POINT])
+  ratio = -dot(plane[PLANE_NORMAL], w) / direction
   u = multiply(u, ratio)
   return add(focus, u)
 
