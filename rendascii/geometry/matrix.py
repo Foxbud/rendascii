@@ -92,6 +92,7 @@ def rotation_3d(theta, axis_normal):
       (0.0, 0.0, 0.0, 1.0,),
       )
 
+
 def projection_3d(near, far, fov, ratio):
   cot = 1 / math.tan(fov / 2)
   d = far - near

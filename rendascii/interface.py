@@ -291,12 +291,12 @@ class Camera:
         ()
         )
     self._transformation = matrix.IDENTITY_3D
-    vert_theta = (math.pi - fov) / 2.0
-    vert_y = math.sin(vert_theta)
-    vert_z = math.cos(vert_theta)
+    vert_theta = math.pi / 4.0
+    vert_y = math.cos(vert_theta)
+    vert_z = math.sin(vert_theta)
     horz_theta = ratio * vert_theta
-    horz_x = math.sin(vert_theta)
-    horz_z = math.cos(vert_theta)
+    horz_x = math.cos(vert_theta)
+    horz_z = math.sin(vert_theta)
     self._view_frustum = (
         # Near plane.
         (
