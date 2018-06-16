@@ -42,9 +42,10 @@ class Engine:
       near=1.0,
       far=11.0,
       fov=math.radians(70),
-      ratio=1.0
+      ratio=1.0,
+      culling=True
       ):
-    camera = Camera(resolution, near, far, fov, ratio)
+    camera = Camera(resolution, near, far, fov, ratio, culling)
     self._cameras.append(camera)
     return camera
 
@@ -278,7 +279,7 @@ class Engine:
 
 class Camera:
 
-  def __init__(self, resolution, near, far, fov, ratio):
+  def __init__(self, resolution, near, far, fov, ratio, culling):
     # Initialize instance attributes.
     self._resolution = resolution
     self._near = near
@@ -297,7 +298,7 @@ class Camera:
     horz_theta = ratio * vert_theta
     horz_x = math.cos(vert_theta)
     horz_z = math.sin(vert_theta)
-    self._view_frustum = (
+    self._view_frustum = [
         # Near plane.
         (
           (0.0, 0.0, 0.0, 0.0,),
@@ -308,27 +309,30 @@ class Camera:
           (0.0, 0.0, far - near, 0.0,),
           (0.0, 0.0, -1.0, 0.0,),
           ),
-        # North plane.
-        (
-          (0.0, 0.0, -near, 0.0,),
-          (0.0, -vert_y, vert_z, 0.0,),
-          ),
-        # South plane.
-        (
-          (0.0, 0.0, -near, 0.0,),
-          (0.0, vert_y, vert_z, 0.0,),
-          ),
-        # East plane.
-        (
-          (0.0, 0.0, -near, 0.0,),
-          (-horz_x, 0.0, horz_z, 0.0,),
-          ),
-        # West plane.
-        (
-          (0.0, 0.0, -near, 0.0,),
-          (horz_x, 0.0, horz_z, 0.0,),
-          ),
-        )
+        ]
+    if culling:
+      self._view_frustum += [
+          # North plane.
+          (
+            (0.0, 0.0, -near, 0.0,),
+            (0.0, -vert_y, vert_z, 0.0,),
+            ),
+          # South plane.
+          (
+            (0.0, 0.0, -near, 0.0,),
+            (0.0, vert_y, vert_z, 0.0,),
+            ),
+          # East plane.
+          (
+            (0.0, 0.0, -near, 0.0,),
+            (-horz_x, 0.0, horz_z, 0.0,),
+            ),
+          # West plane.
+          (
+            (0.0, 0.0, -near, 0.0,),
+            (horz_x, 0.0, horz_z, 0.0,),
+            ),
+          ]
 
   def set_transformation(self, transformation):
     self._transformation = transformation
