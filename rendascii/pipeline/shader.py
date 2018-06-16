@@ -5,6 +5,7 @@ See file LICENSE.txt for full license details.
 
 
 from rendascii.geometry import matrix, polygon, vector
+from rendascii.geometry import PLANE_POINT
 from rendascii.geometry import X, Y, Z, W
 
 
@@ -106,7 +107,8 @@ def s1_sprite_shader(in_packet):
       bound,
       part_transformation,
       projection,
-      aspect_ratio
+      aspect_ratio,
+      view_frustum
       ) = in_packet
 
   # Transform origin from model to camera space.
@@ -124,7 +126,10 @@ def s1_sprite_shader(in_packet):
       )
 
   # Perform frustum culling.
-  if origin_clip[Z] >= 0.0:
+  if (
+      origin_clip[Z] >= view_frustum[0][PLANE_POINT][Z]
+      and origin_clip[Z] <= view_frustum[1][PLANE_POINT][Z]
+      ):
     # Transform bound from model to camera space.
     bound_camera_h = matrix.transform_3d(
         part_transformation,

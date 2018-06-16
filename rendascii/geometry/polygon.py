@@ -177,6 +177,7 @@ def _edge_2d(vec, line_s, line_e):
       - (line_s[X] - line_e[X]) * (vec[Y] - line_e[Y])
       )
 
+
 def _double_area_2d(v0, v1, v2):
   area = (
       v0[X] * v1[Y] + v1[X] * v2[Y] + v2[X] * v0[Y]

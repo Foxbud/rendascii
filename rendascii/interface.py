@@ -255,6 +255,7 @@ class Engine:
               part_transformation,
               camera._projection,
               camera._ratio,
+              camera._view_frustum[:2],
               ),
             ]
 
