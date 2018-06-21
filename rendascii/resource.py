@@ -10,11 +10,12 @@ from rendascii.geometry import X, Y
 
 def load_colormap(colormap_filename, colormap_dir):
   # Open file.
+  colormap = {}
   with open(colormap_dir + colormap_filename, 'r') as f_in:
-    colormap = json.load(f_in)
-    for key in colormap:
-      value = colormap[key]
-      colormap[key] = '\0' if value == '' else value[0]
+    raw_map = json.load(f_in)
+    for key in raw_map:
+      value = raw_map[key]
+      colormap[key.lower()] = '\0' if value == '' else value[0]
 
   return colormap
 
