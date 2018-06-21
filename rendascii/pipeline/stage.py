@@ -203,6 +203,7 @@ def sync_two(in_data):
       (
         fragment_packet[0],
         fragment_packet[1],
+        fragment_packet[2],
         out_polygon_data,
         out_sprite_data,
         )

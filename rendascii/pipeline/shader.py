@@ -183,6 +183,7 @@ def s3_fragment_shader(in_packet):
 
   # Unpack input packet.
   (
+      fog,
       overlay,
       fragment,
       polygons,
@@ -191,7 +192,7 @@ def s3_fragment_shader(in_packet):
 
   # Determine whether to overlay or rasterize fragment.
   current_min_depth = -1.0
-  current_texture = ' '
+  current_texture = fog
   if overlay != '\0':
     # Overlay fragment.
     current_texture = overlay

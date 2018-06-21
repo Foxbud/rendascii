@@ -43,9 +43,10 @@ class Engine:
       far=11.0,
       fov=math.radians(70),
       ratio=1.0,
+      fog_char=' ',
       culling=True
       ):
-    camera = Camera(resolution, near, far, fov, ratio, culling)
+    camera = Camera(resolution, near, far, fov, ratio, fog_char, culling)
     self._cameras.append(camera)
     return camera
 
@@ -259,6 +260,7 @@ class Engine:
     # Pack fragment data.
     out_fragment_data += [
         (
+          camera._fog_char,
           overlay[fragment],
           camera._fragments[fragment],
           )
@@ -277,13 +279,14 @@ class Engine:
 
 class Camera:
 
-  def __init__(self, resolution, near, far, fov, ratio, culling):
+  def __init__(self, resolution, near, far, fov, ratio, fog_char, culling):
     # Initialize instance attributes.
     self._resolution = resolution
     self._near = near
     self._far = far
     self._fov = fov
     self._ratio = ratio
+    self._fog_char = fog_char
     self._projection = matrix.projection_3d(near, far, fov, ratio)
     self._fragments = sum(
         self._gen_fragments(resolution),
