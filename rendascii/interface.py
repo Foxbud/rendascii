@@ -30,10 +30,10 @@ class Engine:
     self._model_instances = []
     self._sprites = {}
     self._sprite_instances = []
-    self._colormap_dir = colormap_dir
-    self._sprite_dir = sprite_dir
-    self._model_dir = model_dir
-    self._material_dir = material_dir
+    self._colormap_dir = self._format_resource_dir(colormap_dir)
+    self._sprite_dir = self._format_resource_dir(sprite_dir)
+    self._model_dir = self._format_resource_dir(model_dir)
+    self._material_dir = self._format_resource_dir(material_dir)
     self._workers = Pool(num_workers) if num_workers > 0 else None
 
   def create_camera(
@@ -159,6 +159,12 @@ class Engine:
         for y
         in range(camera._resolution[Y])
         )
+
+  def _format_resource_dir(self, resource_dir):
+    new_dir = resource_dir
+    if new_dir[-1] != '/':
+      new_dir += '/'
+    return new_dir
 
   def _seed_pipeline(self, camera, overlay):
     # Declare output data.
