@@ -150,7 +150,7 @@ class Engine:
         ) = out_data
 
     # Reshape fragment data to camera resolution.
-    structured_fragment_data = tuple(
+    return tuple(
         tuple(
           out_fragment_data[y * camera._resolution[X] + x][0]
           for x
@@ -158,15 +158,6 @@ class Engine:
           )
         for y
         in range(camera._resolution[Y])
-        )
-
-    # Convert structured fragment data into string.
-    return '\n'.join(
-        tuple(
-          ''.join(row)
-          for row
-          in structured_fragment_data[::-1]
-          )
         )
 
   def _seed_pipeline(self, camera, overlay):
