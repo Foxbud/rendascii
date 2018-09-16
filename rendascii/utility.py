@@ -4,7 +4,47 @@ See file LICENSE.txt for full license details.
 """
 
 
+from datetime import datetime
 from rendascii.geometry import matrix, vector
+import time
+
+
+class FrameRateManager:
+
+  def __init__(self, max_fps=None, fps_interval=0.0):
+    # Initialize instance attributes.
+    self.total_time = 0.0
+    self.total_frames = 0
+    self.time_delta = 0.0
+    self.fps = 0.0
+    self._start_last = datetime.now()
+    self._start_this = self._start_last
+    self._min_delta = None if max_fps is None else 1 / max_fps
+    self._interval = fps_interval
+    self._delta_sum = 0.0
+    self._delta_num = 0
+
+  def update(self):
+    # Update timing data.
+    self._start_last = self._start_this
+    self._start_this = datetime.now()
+    self.time_delta = (self._start_this - self._start_last).total_seconds()
+    # Trigger delay if FPS exceeds max.
+    if self._min_delta is not None:
+      wait_time = self._min_delta - self.time_delta
+      if wait_time > 0.0:
+        time.sleep(wait_time)
+        self.time_delta = self._min_delta
+        self._start_this = datetime.now()
+    self.total_time += self.time_delta
+    self.total_frames += 1
+    self._delta_sum += self.time_delta
+    self._delta_num += 1
+    # Update FPS if interval has elapsed.
+    if self._delta_sum >= self._interval:
+      self.fps = 1.0 / (self._delta_sum / self._delta_num)
+      self._delta_sum = 0.0
+      self._delta_num = 0
 
 
 class Transformer:
