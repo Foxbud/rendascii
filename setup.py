@@ -20,6 +20,11 @@ ext_modules = [
       extra_compile_args=['-O1',]
       ),
     Extension(
+      'rendascii.utility',
+      sources=['rendascii/utility.py',],
+      extra_compile_args=['-O1',]
+      ),
+    Extension(
       'rendascii.pipeline.shader',
       sources=['rendascii/pipeline/shader.py',],
       extra_compile_args=['-O1',]
