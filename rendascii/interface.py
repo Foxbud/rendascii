@@ -299,7 +299,6 @@ class Camera:
 
   def __init__(self, resolution, near, far, fov, ratio, fog_char, culling):
     # Initialize instance attributes.
-    self.view_plane_ub = self._gen_view_plane_ub(near, fov, ratio)
     self._resolution = resolution
     self._near = near
     self._far = far
@@ -312,6 +311,7 @@ class Camera:
         ()
         )
     self._transformation = matrix.IDENTITY_3D
+    self._view_plane_ub = self._gen_view_plane_ub(near, fov, ratio)
     self._view_frustum = [
         # Near plane.
         (
@@ -355,6 +355,9 @@ class Camera:
 
   def set_transformation(self, transformation):
     self._transformation = transformation
+
+  def get_view_upper_bound(self):
+    return self._view_plane_ub
 
   def _gen_view_plane_ub(self, near, fov, ratio):
     y_pos = near * math.tan(fov  / 2)

@@ -13,10 +13,10 @@ class FrameRateManager:
 
   def __init__(self, max_fps=None, fps_interval=0.0):
     # Initialize instance attributes.
-    self.total_time = 0.0
-    self.total_frames = 0
-    self.time_delta = 0.0
-    self.fps = 0.0
+    self._total_time = 0.0
+    self._total_frames = 0
+    self._time_delta = 0.0
+    self._fps = 0.0
     self._start_last = datetime.now()
     self._start_this = self._start_last
     self._min_delta = None if max_fps is None else 1 / max_fps
@@ -28,23 +28,38 @@ class FrameRateManager:
     # Update timing data.
     self._start_last = self._start_this
     self._start_this = datetime.now()
-    self.time_delta = (self._start_this - self._start_last).total_seconds()
+    self._time_delta = (self._start_this - self._start_last).total_seconds()
     # Trigger delay if FPS exceeds max.
     if self._min_delta is not None:
-      wait_time = self._min_delta - self.time_delta
+      wait_time = self._min_delta - self._time_delta
       if wait_time > 0.0:
         time.sleep(wait_time)
-        self.time_delta = self._min_delta
+        self._time_delta = self._min_delta
         self._start_this = datetime.now()
-    self.total_time += self.time_delta
-    self.total_frames += 1
-    self._delta_sum += self.time_delta
+    self._total_time += self._time_delta
+    self._total_frames += 1
+    self._delta_sum += self._time_delta
     self._delta_num += 1
     # Update FPS if interval has elapsed.
     if self._delta_sum >= self._interval:
-      self.fps = 1.0 / (self._delta_sum / self._delta_num)
+      self._fps = 1.0 / (self._delta_sum / self._delta_num)
       self._delta_sum = 0.0
       self._delta_num = 0
+
+  def get_total_time(self):
+    return self._total_time
+
+  def get_total_frames(self):
+    return self._total_frames
+
+  def get_delta_time(self):
+    return self._time_delta
+
+  def get_fps(self, clean=False):
+    fps = self._fps
+    if clean:
+      fps = int(round(fps))
+    return fps
 
 
 class Transformer:
