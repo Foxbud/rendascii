@@ -299,6 +299,7 @@ class Camera:
 
   def __init__(self, resolution, near, far, fov, ratio, fog_char, culling):
     # Initialize instance attributes.
+    self.view_plane_ub = self._gen_view_plane_ub(near, fov, ratio)
     self._resolution = resolution
     self._near = near
     self._far = far
@@ -354,6 +355,17 @@ class Camera:
 
   def set_transformation(self, transformation):
     self._transformation = transformation
+
+  def _gen_view_plane_ub(self, near, fov, ratio):
+    y_pos = near * math.tan(fov  / 2)
+
+    view_plane_ub = (
+        y_pos * ratio,
+        y_pos,
+        near,
+        )
+
+    return view_plane_ub
 
   def _gen_fragments(self, resolution):
     frag_size = (2 / resolution[X], 2 / resolution[Y],)
