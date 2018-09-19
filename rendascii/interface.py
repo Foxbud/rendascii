@@ -112,7 +112,7 @@ class Engine:
         if instance is not model_instance
         ]
 
-  def render_frame(self, camera, overlay=None):
+  def render_frame(self, camera, overlay=None, as_str=False):
     # Prepare overlay.
     flat_overlay = (
         tuple(
@@ -151,7 +151,7 @@ class Engine:
         ) = out_data
 
     # Reshape fragment data to camera resolution.
-    return tuple(
+    frame = tuple(
         tuple(
           out_fragment_data[y * camera._resolution[X] + x][0]
           for x
@@ -160,6 +160,20 @@ class Engine:
         for y
         in range(camera._resolution[Y])
         )
+
+    # Convert frame to printable string if requested.
+    if as_str:
+      frame = '\n'.join(
+          tuple(
+            ''.join(
+              row
+              )
+            for row
+            in frame[::-1]
+            )
+          )
+
+    return frame
 
   def _format_resource_dir(self, resource_dir):
     new_dir = resource_dir
@@ -205,7 +219,7 @@ class Engine:
             vertices,
             polygons,
             colors
-            ) = self._models[instance._model_name]
+            ) = self._models[instance._resource_name]
         vert_offset = len(out_vertex_data)
 
         # Pack vertex data.
@@ -252,7 +266,7 @@ class Engine:
         # Unpack sprite data.
         (
             sprite
-            ) = self._sprites[instance._sprite_name]
+            ) = self._sprites[instance._resource_name]
 
         # Colormap sprite.
         mapped_sprite = tuple(
@@ -389,45 +403,37 @@ class Camera:
     return fragments
 
 
-class SpriteInstance:
+class _ResourceInstance:
+
+  def __init__(self, resource_name, colormap_name):
+    # Initialize instance attributes.
+    self._resource_name = resource_name
+    self._colormap_name = colormap_name
+    self._transformation = matrix.IDENTITY_3D
+    self._hidden = False
+
+  def set_colormap(self, colormap_name):
+    self._colormap_name = colormap_name
+
+  def set_transformation(self, transformation):
+    self._transformation = transformation
+
+  def hide(self):
+    self._hidden = True
+
+  def unhide(self):
+    self._hidden = False
+
+
+class SpriteInstance(_ResourceInstance):
 
   def __init__(self, sprite_name, colormap_name):
     # Initialize instance attributes.
-    self._sprite_name = sprite_name
-    self._colormap_name = colormap_name
-    self._transformation = matrix.IDENTITY_3D
-    self._hidden = False
-
-  def set_colormap(self, colormap_name):
-    self._colormap_name = colormap_name
-
-  def set_transformation(self, transformation):
-    self._transformation = transformation
-
-  def hide(self):
-    self._hidden = True
-
-  def unhide(self):
-    self._hidden = False
+    super().__init__(sprite_name, colormap_name)
 
 
-class ModelInstance:
+class ModelInstance(_ResourceInstance):
 
   def __init__(self, model_name, colormap_name):
     # Initialize instance attributes.
-    self._model_name = model_name
-    self._colormap_name = colormap_name
-    self._transformation = matrix.IDENTITY_3D
-    self._hidden = False
-
-  def set_colormap(self, colormap_name):
-    self._colormap_name = colormap_name
-
-  def set_transformation(self, transformation):
-    self._transformation = transformation
-
-  def hide(self):
-    self._hidden = True
-
-  def unhide(self):
-    self._hidden = False
+    super().__init__(model_name, colormap_name)
