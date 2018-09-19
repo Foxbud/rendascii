@@ -61,7 +61,7 @@ def load_sprite(sprite_filename, sprite_dir):
   return sprite[::-1]
 
 
-def load_model(model_filename, model_dir, material_dir):
+def load_model(model_filename, model_dir, material_dir, right_handed):
   # Initialize return values.
   vertices = []
   faces = []
@@ -77,13 +77,15 @@ def load_model(model_filename, model_dir, material_dir):
 
         # Check for vertex definition.
         if words[0] == 'v':
-          vertices.append(
-              tuple(
-                float(component)
-                for component
-                in words[1:]
-                )
-              )
+          vertex = [
+              float(component)
+              for component
+              in words[1:]
+              ]
+          # Flip X axis if right-handed model.
+          if right_handed:
+            vertex[X] = -vertex[X]
+          vertices.append(tuple(vertex))
 
         # Check for face definition.
         elif words[0] == 'f':
@@ -94,8 +96,11 @@ def load_model(model_filename, model_dir, material_dir):
           for component in words[1:]:
             vert_info = component.split('/')
             verts.append(int(vert_info[0]) - 1)
+          # Reverse vertex order if right-handed model.
+          if right_handed:
+            verts = verts[::-1]
           # Construct face data.
-          faces.append(verts)
+          faces.append(tuple(verts))
 
         # Check for material to use.
         elif words[0] == 'usemtl':

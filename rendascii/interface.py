@@ -75,11 +75,12 @@ class Engine:
   def unload_sprite(self, sprite_name):
     del self._sprites[sprite_name]
 
-  def load_model(self, model_name, model_filename):
+  def load_model(self, model_name, model_filename, right_handed=False):
     self._models[model_name] = resource.load_model(
         model_filename,
         self._model_dir,
-        self._material_dir
+        self._material_dir,
+        right_handed
         )
 
   def unload_model(self, model_name):
