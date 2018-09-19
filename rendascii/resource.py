@@ -21,7 +21,7 @@ def load_colormap(colormap_filename, colormap_dir):
 
 
 def load_sprite(sprite_filename, sprite_dir):
-  # Initialize return value.
+  # Declare return value.
   sprite = []
 
   # Open file.
@@ -58,11 +58,11 @@ def load_sprite(sprite_filename, sprite_dir):
             )
       sprite.append(row)
   
-  return sprite[::-1]
+  return tuple(sprite[::-1])
 
 
 def load_model(model_filename, model_dir, material_dir, right_handed):
-  # Initialize return values.
+  # Declare return data.
   vertices = []
   faces = []
   face_colors = []
@@ -110,15 +110,16 @@ def load_model(model_filename, model_dir, material_dir, right_handed):
         elif words[0] == 'mtllib':
           materials = _load_materials(words[1], material_dir)
 
+  # Pack return data.
   return (
-    vertices,
-    faces,
-    face_colors,
+    tuple(vertices),
+    tuple(faces),
+    tuple(face_colors),
     )
 
 
 def _load_materials(material_filename, material_dir):
-  # Initialize return values.
+  # Declare return value.
   materials = {}
 
   # Open file.

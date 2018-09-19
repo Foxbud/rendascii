@@ -168,15 +168,29 @@ class Engine:
     return new_dir
 
   def _seed_pipeline(self, camera, overlay):
+    # Create seed data.
+    out_vertex_data, out_polygon_data = self._seed_model_instances(camera)
+    out_sprite_data = self._seed_sprite_instances(camera)
+    out_fragment_data = self._seed_camera_instance(camera, overlay)
+
+    # Pack output data.
+    return (
+        self._workers,
+        out_vertex_data,
+        out_polygon_data,
+        out_sprite_data,
+        out_fragment_data,
+        )
+
+  def _seed_model_instances(self, camera):
     # Declare output data.
     out_vertex_data = []
     out_polygon_data = []
-    out_sprite_data = []
-    out_fragment_data = []
 
     # Create model instances.
     for instance in self._model_instances:
       if not instance._hidden:
+        # Transformation from model to clip space.
         full_transformation = matrix.compose(
             camera._projection,
             matrix.compose(
@@ -219,9 +233,16 @@ class Engine:
             in range(len(polygons))
             ]
 
+    return tuple(out_vertex_data), tuple(out_polygon_data)
+
+  def _seed_sprite_instances(self, camera):
+    # Declare output data.
+    out_sprite_data = []
+
     # Create sprite instances.
     for instance in self._sprite_instances:
       if not instance._hidden:
+        # Transformation from sprite to camera space.
         part_transformation = matrix.compose(
             camera._transformation,
             instance._transformation
@@ -257,8 +278,11 @@ class Engine:
               ),
             ]
 
+    return tuple(out_sprite_data)
+
+  def _seed_camera_instance(self, camera, overlay):
     # Pack fragment data.
-    out_fragment_data += [
+    out_fragment_data = tuple(
         (
           camera._fog_char,
           overlay[fragment],
@@ -266,15 +290,9 @@ class Engine:
           )
         for fragment
         in range(len(camera._fragments))
-        ]
-
-    return (
-        self._workers,
-        tuple(out_vertex_data),
-        tuple(out_polygon_data),
-        tuple(out_sprite_data),
-        tuple(out_fragment_data),
         )
+
+    return out_fragment_data
 
 
 class Camera:
