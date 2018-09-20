@@ -177,7 +177,7 @@ class Engine:
 
   def _format_resource_dir(self, resource_dir):
     new_dir = resource_dir
-    if new_dir[-1] != '/':
+    if len(new_dir) > 0 and new_dir[-1] != '/':
       new_dir += '/'
     return new_dir
 
