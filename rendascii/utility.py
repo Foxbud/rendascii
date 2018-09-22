@@ -134,7 +134,7 @@ class Transformer:
     return vector.conv_h_to_3d(
         matrix.transform_3d(
           self._transformation,
-          vector.conv_3d_h(
+          vector.conv_3d_to_h(
             vec
             )
           )
