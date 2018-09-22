@@ -319,12 +319,12 @@ class Camera:
     self._fov = fov
     self._ratio = ratio
     self._fog_char = fog_char
-    self._projection = matrix.projection_3d(near, far, fov, ratio)
+    self._projection = matrix.projection_h(near, far, fov, ratio)
     self._fragments = sum(
         self._gen_fragments(resolution),
         ()
         )
-    self._transformation = matrix.IDENTITY_3D
+    self._transformation = matrix.IDENTITY_H
     self._view_plane_ub = self._gen_view_plane_ub(near, fov, ratio)
     self._view_frustum = [
         # Near plane.
@@ -409,7 +409,7 @@ class _ResourceInstance:
     # Initialize instance attributes.
     self._resource_name = resource_name
     self._colormap_name = colormap_name
-    self._transformation = matrix.IDENTITY_3D
+    self._transformation = matrix.IDENTITY_H
     self._hidden = False
 
   def set_colormap(self, colormap_name):

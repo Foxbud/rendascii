@@ -8,7 +8,7 @@ import math
 from rendascii.geometry import X, Y, Z
 
 
-IDENTITY_3D = (
+IDENTITY_H = (
       (1.0, 0.0, 0.0, 0.0,),
       (0.0, 1.0, 0.0, 0.0,),
       (0.0, 0.0, 1.0, 0.0,),
@@ -48,9 +48,9 @@ def transpose(matrix):
       )
 
 
-# 3D matrix functions.
+# Homogeneous matrix functions.
 
-def transform_3d(matrix, vec):
+def transform_h(matrix, vec):
   return tuple(
       sum(
         tuple(
@@ -64,7 +64,7 @@ def transform_3d(matrix, vec):
       )
 
 
-def scaling_3d(scalar):
+def scaling_h(scalar):
   return (
       (scalar, 0.0, 0.0, 0.0,),
       (0.0, scalar, 0.0, 0.0,),
@@ -73,7 +73,7 @@ def scaling_3d(scalar):
       )
 
 
-def translation_3d(vec):
+def translation_h(vec):
   return (
       (1.0, 0.0, 0.0, vec[X],),
       (0.0, 1.0, 0.0, vec[Y],),
@@ -82,7 +82,7 @@ def translation_3d(vec):
       )
 
 
-def rotation_3d(theta, axis_normal):
+def rotation_h(theta, axis_normal):
   x = axis_normal[X]
   y = axis_normal[Y]
   z = axis_normal[Z]
@@ -97,7 +97,7 @@ def rotation_3d(theta, axis_normal):
       )
 
 
-def projection_3d(near, far, fov, ratio):
+def projection_h(near, far, fov, ratio):
   cot = 1 / math.tan(fov / 2)
   d = far - near
   return (

@@ -20,7 +20,7 @@ def s1_vertex_shader(in_packet):
       ) = in_packet
 
   # Transform vertex from model to clip space.
-  vert_clip = matrix.transform_3d(
+  vert_clip = matrix.transform_h(
       full_transformation,
       vector.conv_3d_to_h(
         vertex
@@ -112,7 +112,7 @@ def s1_sprite_shader(in_packet):
       ) = in_packet
 
   # Transform origin from model to camera space.
-  origin_camera_h = matrix.transform_3d(
+  origin_camera_h = matrix.transform_h(
       part_transformation,
       vector.conv_3d_to_h(
         origin
@@ -120,7 +120,7 @@ def s1_sprite_shader(in_packet):
       )
 
   # Transform origin from camera to clip space.
-  origin_clip = matrix.transform_3d(
+  origin_clip = matrix.transform_h(
       projection,
       origin_camera_h
       )
@@ -131,7 +131,7 @@ def s1_sprite_shader(in_packet):
       and origin_clip[Z] <= view_frustum[1][PLANE_POINT][Z]
       ):
     # Transform bound from model to camera space.
-    bound_camera_h = matrix.transform_3d(
+    bound_camera_h = matrix.transform_h(
         part_transformation,
         vector.conv_3d_to_h(
           bound
@@ -139,7 +139,7 @@ def s1_sprite_shader(in_packet):
         )
 
     # Reorient and transform bound from camera to clip space.
-    bound_clip = matrix.transform_3d(
+    bound_clip = matrix.transform_h(
         projection,
         vector.add(
           origin_camera_h,

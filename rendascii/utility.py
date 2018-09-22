@@ -67,19 +67,19 @@ class Transformer:
   def __init__(self, inverse=False):
     # Initialize instance attributes.
     self._inverse = inverse
-    self._transformation = matrix.IDENTITY_3D
+    self._transformation = matrix.IDENTITY_H
 
   def scale(self, scalar):
     if self._inverse:
       self._transformation = matrix.compose(
           self._transformation,
-          matrix.scaling_3d(
+          matrix.scaling_h(
             1.0 / scalar
             )
           )
     else:
       self._transformation = matrix.compose(
-          matrix.scaling_3d(
+          matrix.scaling_h(
             scalar
             ),
           self._transformation
@@ -92,7 +92,7 @@ class Transformer:
     if self._inverse:
       self._transformation = matrix.compose(
           self._transformation,
-          matrix.translation_3d(
+          matrix.translation_h(
             vector.negate(
               vec
               )
@@ -100,7 +100,7 @@ class Transformer:
           )
     else:
       self._transformation = matrix.compose(
-          matrix.translation_3d(
+          matrix.translation_h(
             vec
             ),
           self._transformation
@@ -113,14 +113,14 @@ class Transformer:
     if self._inverse:
       self._transformation = matrix.compose(
           self._transformation,
-          matrix.rotation_3d(
+          matrix.rotation_h(
             -theta,
             axis_normal
             )
           )
     else:
       self._transformation = matrix.compose(
-          matrix.rotation_3d(
+          matrix.rotation_h(
             theta,
             axis_normal
             ),
@@ -132,7 +132,7 @@ class Transformer:
 
   def apply(self, vec):
     return vector.conv_h_to_3d(
-        matrix.transform_3d(
+        matrix.transform_h(
           self._transformation,
           vector.conv_3d_to_h(
             vec
@@ -141,7 +141,7 @@ class Transformer:
         )
 
   def clear(self):
-    self._transformation = matrix.IDENTITY_3D
+    self._transformation = matrix.IDENTITY_H
 
     # Return self for convenience.
     return self
