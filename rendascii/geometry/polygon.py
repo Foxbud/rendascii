@@ -6,7 +6,7 @@ See file LICENSE.txt for full license details.
 
 from rendascii.geometry import vector
 from rendascii.geometry import PLANE_NORMAL, PLANE_POINT
-from rendascii.geometry import X, Y, Z
+from rendascii.geometry import X, Y
 
 
 # 2D polygon functions.

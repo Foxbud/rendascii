@@ -7,7 +7,7 @@ See file LICENSE.txt for full license details.
 import math
 from multiprocessing import Pool
 from rendascii import resource
-from rendascii.geometry import AXIS_NORMALS, X, Y
+from rendascii.geometry import X, Y
 from rendascii.geometry import matrix
 from rendascii.pipeline import stage
 
@@ -197,7 +197,7 @@ class Engine:
         )
 
   def _seed_model_instances(self, camera):
-    # Declare output data.
+    # Initialize output data.
     out_vertex_data = []
     out_polygon_data = []
 
@@ -250,7 +250,7 @@ class Engine:
     return tuple(out_vertex_data), tuple(out_polygon_data)
 
   def _seed_sprite_instances(self, camera):
-    # Declare output data.
+    # Initialize output data.
     out_sprite_data = []
 
     # Create sprite instances.

@@ -55,9 +55,9 @@ class FrameRateManager:
   def get_delta_time(self):
     return self._time_delta
 
-  def get_fps(self, clean=False):
+  def get_fps(self, as_int=False):
     fps = self._fps
-    if clean:
+    if as_int:
       fps = int(round(fps))
     return fps
 

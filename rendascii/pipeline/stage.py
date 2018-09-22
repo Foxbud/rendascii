@@ -4,7 +4,6 @@ See file LICENSE.txt for full license details.
 """
 
 
-from rendascii.geometry import Z
 from rendascii.pipeline import shader
 
 
@@ -18,7 +17,7 @@ def stage_one(in_data):
       in_fragment_data
       ) = in_data
 
-  # Declare output data.
+  # Declare/initialize output data.
   out_vertex_data = None
   out_polygon_data = in_polygon_data
   out_sprite_data = None
@@ -66,7 +65,7 @@ def stage_two(in_data):
       in_fragment_data
       ) = in_data
 
-  # Declare output data.
+  # Declare/initialize output data.
   out_vertex_data = in_vertex_data
   out_polygon_data = None
   out_sprite_data = in_sprite_data
@@ -105,7 +104,7 @@ def stage_three(in_data):
       in_fragment_data
       ) = in_data
 
-  # Declare output data.
+  # Declare/initialize output data.
   out_vertex_data = in_vertex_data
   out_polygon_data = in_polygon_data
   out_sprite_data = in_sprite_data
@@ -144,7 +143,7 @@ def sync_one(in_data):
       in_fragment_data
       ) = in_data
 
-  # Declare output data.
+  # Declare/initialize output data.
   out_vertex_data = in_vertex_data
   out_polygon_data = None
   out_sprite_data = None
@@ -191,7 +190,7 @@ def sync_two(in_data):
       in_fragment_data
       ) = in_data
 
-  # Declare output data.
+  # Declare/initialize output data.
   out_vertex_data = in_vertex_data
   out_polygon_data = None
   out_sprite_data = in_sprite_data

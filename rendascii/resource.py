@@ -5,7 +5,7 @@ See file LICENSE.txt for full license details.
 
 
 import json
-from rendascii.geometry import X, Y
+from rendascii.geometry import X
 
 
 def load_colormap(colormap_filename, colormap_dir):
@@ -21,7 +21,7 @@ def load_colormap(colormap_filename, colormap_dir):
 
 
 def load_sprite(sprite_filename, sprite_dir):
-  # Declare return value.
+  # Initialize output data.
   sprite = []
 
   # Open file.
@@ -62,7 +62,7 @@ def load_sprite(sprite_filename, sprite_dir):
 
 
 def load_model(model_filename, model_dir, material_dir, right_handed):
-  # Declare return data.
+  # Initialize output data.
   vertices = []
   faces = []
   face_colors = []
@@ -110,7 +110,7 @@ def load_model(model_filename, model_dir, material_dir, right_handed):
         elif words[0] == 'mtllib':
           materials = _load_materials(words[1], material_dir)
 
-  # Pack return data.
+  # Pack output data.
   return (
     tuple(vertices),
     tuple(faces),
@@ -119,7 +119,7 @@ def load_model(model_filename, model_dir, material_dir, right_handed):
 
 
 def _load_materials(material_filename, material_dir):
-  # Declare return value.
+  # Initialize output data.
   materials = {}
 
   # Open file.

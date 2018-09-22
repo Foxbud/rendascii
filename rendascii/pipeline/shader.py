@@ -37,7 +37,7 @@ def s1_vertex_shader(in_packet):
 
 def s2_polygon_shader(in_packet):
   # Declare output packet.
-  out_packet = ()
+  out_packet = None
 
   # Unpack input packet.
   (
@@ -69,7 +69,7 @@ def s2_polygon_shader(in_packet):
             plane
             )
       culled_polys = tmp_polys
-    # Transform polygons from clip to ndc space.
+    # Transform polygons from clip to NDC space.
     for p in range(len(culled_polys)):
       tmp_poly = [None,] * 3
       tmp_depths = [None,] * 3
@@ -97,7 +97,7 @@ def s2_polygon_shader(in_packet):
 
 
 def s1_sprite_shader(in_packet):
-  # Declare output_packet.
+  # Declare output packet.
   out_packet = None
 
   # Unpack input packet.
@@ -152,10 +152,10 @@ def s1_sprite_shader(in_packet):
           )
         )
 
-    # Normalize origin from clip to NDC space.
+    # Transform origin from clip to NDC space.
     origin_ndc = vector.conv_h_to_3d(origin_clip)
 
-    # Normalize bound from clip to NDC space.
+    # Transform bound from clip to NDC space.
     bound_ndc = vector.conv_h_to_3d(bound_clip)
 
     # Create sprite AABB.

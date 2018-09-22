@@ -5,7 +5,7 @@ See file LICENSE.txt for full license details.
 
 
 import math
-from rendascii.geometry import X, Y, Z, W
+from rendascii.geometry import X, Y, Z
 
 
 IDENTITY_3D = (
@@ -15,6 +15,8 @@ IDENTITY_3D = (
       (0.0, 0.0, 0.0, 1.0,),
       )
 
+
+# Common matrix functions.
 
 def compose(matrix_a, matrix_b):
   return tuple(
@@ -45,6 +47,8 @@ def transpose(matrix):
       in range(len(matrix))
       )
 
+
+# 3D matrix functions.
 
 def transform_3d(matrix, vec):
   return tuple(
