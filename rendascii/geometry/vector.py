@@ -7,6 +7,7 @@ See file LICENSE.txt for full license details.
 import math
 from rendascii.geometry import PLANE_NORMAL, PLANE_POINT
 from rendascii.geometry import X, Y, Z, W
+from sys import float_info
 
 
 # Common vector functions.
@@ -84,6 +85,9 @@ def cross_3d(vec_a, vec_b):
 def project_h(vec, focus, plane):
   u = subtract(vec, focus)
   direction = dot(plane[PLANE_NORMAL], u)
+  # Handle potential division by zero.
+  if direction == 0.0:
+    direction = float_info.min
   w = subtract(focus, plane[PLANE_POINT])
   ratio = -dot(plane[PLANE_NORMAL], w) / direction
   u = multiply(u, ratio)
