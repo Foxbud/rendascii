@@ -12,7 +12,7 @@ Please direct questions to **rendascii@gmail.com**.
 
 * No external dependencies; uses just the Python standard library.
 * Multiprocess based rendering.
-* Optional Cython based accelerator modules.
+* Optional Cython based accelerator extension modules.
 * Load and render 3D models from Wavefront object and material files (\*.obj and \*.mtl, respectively).
 * Load and render 2D sprites from ASCII based Portable PixMap files (\*.ppm).
 * Render the same or different scene(s) using multiple virtual cameras.
@@ -24,12 +24,20 @@ Please direct questions to **rendascii@gmail.com**.
 
 ## Installation
 
-`# pip3 install -U rendascii` - system wide installation using PyPI.
+`# pip3 install rendascii` - system wide installation **without** compiled extensions.
 
-`$ pip3 install --user -U rendascii` - local user installation using PyPI.
+`$ pip3 install --user rendascii` - local user installation **without** compiled extensions.
+
+`# pip3 install --no-binary :all: rendascii` - system wide installation **with** compiled extensions.
+
+`$ pip3 install --user --no-binary :all: rendascii` - local user installation **with** compiled extensions.
 
 ## Building
 
-`$ python3 -m setup bdist_wheel` - build extension based wheel from source.
+`$ git clone https://bitbucket.org/Foxbud/rendascii.git` - clone repository source.
 
-`$ pypy3 -m setup bdist_wheel` - build pure python wheel from source.
+`$ cd rendascii` - change working directory to local repository.
+
+`$ python3 -m setup bdist_wheel` - build distribution **without** extension modules.
+
+`$ python3 -m setup bdist` - build distribution **with** extension modules.
