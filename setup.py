@@ -12,13 +12,13 @@ from setuptools import find_packages, setup
 name = 'rendascii'
 use_scm_version = True
 setup_requires = ['setuptools_scm',]
-description = 'ASCII 3D rendering engine'
+description = 'Real-time ASCII 3D rendering engine'
 with open('README.md', 'r') as f_in:
   long_description = f_in.read()
 long_description_content_type = 'text/markdown'
 url = 'https://bitbucket.org/Foxbud/rendascii'
 author = 'Garrett Fairburn'
-author_email = 'breadboardfox@gmail.com'
+author_email = 'rendascii@gmail.com'
 license = 'MIT'
 packages = find_packages()
 classifiers = [
