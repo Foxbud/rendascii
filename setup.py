@@ -4,58 +4,45 @@ See file LICENSE.txt for full license details.
 """
 
 
-from platform import python_implementation
 from setuptools import find_packages, setup
+import sys
 
 
-# Package parameters.
-name = 'rendascii'
-use_scm_version = True
-setup_requires = ['setuptools_scm',]
-description = 'Real-time ASCII 3D rendering engine'
+# Package building parameters.
+setup_info = dict(
+    name='rendascii',
+    use_scm_version=True,
+    setup_requires=['setuptools_scm',],
+    description='Real-time ASCII 3D rendering engine',
+    long_description_content_type='text/markdown',
+    url='https://bitbucket.org/Foxbud/rendascii',
+    author='Garrett Fairburn',
+    author_email='rendascii@gmail.com',
+    license='MIT',
+    packages=find_packages(),
+    classifiers=[
+        'Programming Language :: Python :: 3',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: OS Independent',
+        'Environment :: Console',
+        'Topic :: Multimedia :: Graphics :: 3D Rendering',
+        'Development Status :: 3 - Alpha',
+        'Intended Audience :: Developers',
+        'Natural Language :: English',
+        ],
+    )
+
+
+# Load README.
 with open('README.md', 'r') as f_in:
-  long_description = f_in.read()
-long_description_content_type = 'text/markdown'
-url = 'https://bitbucket.org/Foxbud/rendascii'
-author = 'Garrett Fairburn'
-author_email = 'rendascii@gmail.com'
-license = 'MIT'
-packages = find_packages()
-classifiers = [
-    'Programming Language :: Python :: 3',
-    'License :: OSI Approved :: MIT License',
-    'Operating System :: OS Independent',
-    'Environment :: Console',
-    'Topic :: Multimedia :: Graphics :: 3D Rendering',
-    'Development Status :: 3 - Alpha',
-    'Intended Audience :: Developers',
-    'Natural Language :: English',
-    ]
+  setup_info['long_description'] = f_in.read()
 
 
-# Build without extensions.
-def build_wo_ext():
-  setup(
-      name=name,
-      use_scm_version=use_scm_version,
-      setup_requires=setup_requires,
-      description=description,
-      long_description=long_description,
-      long_description_content_type=long_description_content_type,
-      url=url,
-      author=author,
-      author_email=author_email,
-      license=license,
-      packages=packages,
-      classifiers=classifiers
-  )
-
-
-# Build with extensions.
-def build_w_ext():
+# Compile extensions if not building a wheel.
+if 'bdist_wheel' not in sys.argv:
   from Cython.Build import cythonize
   from setuptools import Extension
-  
+
   ext_modules = [
       Extension(
         'rendascii.interface',
@@ -98,31 +85,14 @@ def build_w_ext():
         extra_compile_args=['-O1',]
         ),
       ]
-  
-  setup(
-      name=name,
-      use_scm_version=use_scm_version,
-      ext_modules=cythonize(
-        ext_modules,
-        compiler_directives={
-          'embedsignature': True,
-          }
-        ),
-      setup_requires=setup_requires + ['cython',],
-      description=description,
-      long_description=long_description,
-      long_description_content_type=long_description_content_type,
-      url=url,
-      author=author,
-      author_email=author_email,
-      license=license,
-      packages=packages,
-      classifiers=classifiers
-  )
+
+  setup_info['ext_modules'] = cythonize(
+      ext_modules,
+      compiler_directives={
+        'embedsignature': True,
+        }
+      )
+  setup_info['setup_requires'] += ['cython',]
 
 
-# Only build extension modules if using CPython.
-if python_implementation() == 'CPython':
-  build_w_ext()
-else:
-  build_wo_ext()
+setup(**setup_info)
