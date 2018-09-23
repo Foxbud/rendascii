@@ -37,7 +37,7 @@ def s1_vertex_shader(in_packet):
 
 def s2_polygon_shader(in_packet):
   # Declare output packet.
-  out_packet = None
+  out_packet = ()
 
   # Unpack input packet.
   (
