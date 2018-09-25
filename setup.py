@@ -4,8 +4,12 @@ See file LICENSE.txt for full license details.
 """
 
 
+import os
 from setuptools import find_packages, setup
-import sys
+
+
+# Custom environment variable to disable extension building.
+PURE_PY_ENV_VAR = 'PURE_PY_DIST'
 
 
 # Package building parameters.
@@ -38,8 +42,8 @@ with open('README.md', 'r') as f_in:
   setup_info['long_description'] = f_in.read()
 
 
-# Compile extensions if not building a wheel.
-if 'bdist_wheel' not in sys.argv:
+# Only cythonize extensions if not disabled.
+if PURE_PY_ENV_VAR not in os.environ:
   from Cython.Build import cythonize
   from setuptools import Extension
 
