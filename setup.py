@@ -44,10 +44,9 @@ with open('README.md', 'r') as f_in:
 
 # Only cythonize extensions if not disabled.
 if PURE_PY_ENV_VAR not in os.environ:
-  from Cython.Build import cythonize
   from setuptools import Extension
 
-  ext_modules = [
+  setup_info['ext_modules'] = [
       Extension(
         'rendascii.interface',
         sources=['rendascii/interface.py',],
@@ -89,13 +88,6 @@ if PURE_PY_ENV_VAR not in os.environ:
         extra_compile_args=['-O1',]
         ),
       ]
-
-  setup_info['ext_modules'] = cythonize(
-      ext_modules,
-      compiler_directives={
-        'embedsignature': True,
-        }
-      )
 
 
 setup(**setup_info)
