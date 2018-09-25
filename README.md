@@ -24,20 +24,18 @@ Please direct questions to **rendascii@gmail.com**.
 
 ## Installation
 
-`# pip3 install rendascii` - system wide installation **without** compiled extensions.
+### Using Pip
 
-`$ pip3 install --user rendascii` - local user installation **without** compiled extensions.
+`# pip3 install rendascii` - download and install pure Python distribution.
 
-`# pip3 install --no-binary :all: rendascii` - system wide installation **with** compiled extensions.
+`# pip3 install --no-binary :all: rendascii` - download source distribution, build accelerator extension modules using Cython and a C compiler, and install resulting binary distribution.
 
-`$ pip3 install --user --no-binary :all: rendascii` - local user installation **with** compiled extensions.
-
-## Building
+### Manual
 
 `$ git clone https://bitbucket.org/Foxbud/rendascii.git` - clone repository source.
 
-`$ cd rendascii` - change working directory to local repository.
+`$ cd rendascii` - change working directory to cloned source.
 
-`$ python3 -m setup bdist_wheel` - build distribution **without** extension modules.
+`# python3 -m setup install` - build accelerator extension modules using Cython and a C compiler and install resulting binary distribution.
 
-`$ python3 -m setup bdist` - build distribution **with** extension modules.
+`# PURE_PY_DIST=true python3 -m setup install` - build and install pure Python distribution.
