@@ -28,7 +28,7 @@ Please direct questions to **rendascii@gmail.com**.
 
 `# pip3 install rendascii` - download and install pure Python distribution.
 
-`# pip3 install --no-binary :all: rendascii` - download source distribution, build accelerator extension modules using Cython and a C compiler, and install resulting binary distribution.
+`# pip3 install --no-binary rendascii rendascii` - download source distribution, build accelerator extension modules, and install resulting binary distribution.
 
 ### Manual
 
@@ -36,6 +36,6 @@ Please direct questions to **rendascii@gmail.com**.
 
 `$ cd rendascii` - change working directory to cloned source.
 
-`# python3 -m setup install` - build accelerator extension modules using Cython and a C compiler and install resulting binary distribution.
+`# python3 -m setup install` - build accelerator extension modules and install resulting binary distribution.
 
 `# PURE_PY_DIST=true python3 -m setup install` - build and install pure Python distribution.
