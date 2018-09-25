@@ -12,7 +12,7 @@ import sys
 setup_info = dict(
     name='rendascii',
     use_scm_version=True,
-    setup_requires=['setuptools_scm',],
+    setup_requires=['setuptools_scm', 'cython',],
     description='Real-time ASCII 3D rendering engine',
     long_description_content_type='text/markdown',
     url='https://bitbucket.org/Foxbud/rendascii',
@@ -92,7 +92,6 @@ if 'bdist_wheel' not in sys.argv:
         'embedsignature': True,
         }
       )
-  setup_info['setup_requires'] += ['cython',]
 
 
 setup(**setup_info)
