@@ -269,15 +269,17 @@ class Engine:
             ) = self._sprites[instance._resource_name]
 
         # Colormap sprite.
-        mapped_sprite = tuple(
-            tuple(
-              colormap[pixel]
-              for pixel
-              in row
+        if instance._mapped_sprite is None:
+          instance._mapped_sprite = tuple(
+              tuple(
+                colormap[pixel]
+                for pixel
+                in row
+                )
+              for row
+              in sprite
               )
-            for row
-            in sprite
-            )
+        mapped_sprite = instance._mapped_sprite
 
         # Pack sprite data.
         out_sprite_data += [
@@ -430,6 +432,11 @@ class SpriteInstance(_ResourceInstance):
   def __init__(self, sprite_name, colormap_name):
     # Initialize instance attributes.
     super().__init__(sprite_name, colormap_name)
+    self._mapped_sprite = None
+
+  def set_colormap(self, colormap_name):
+    super().set_colormap(colormap_name)
+    self._mapped_sprite = None
 
 
 class ModelInstance(_ResourceInstance):
