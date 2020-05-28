@@ -42,10 +42,10 @@ def aabb_contains_point_2d(aabb, point):
 
 def poly_contains_point_2d(poly, point):
   start = _edge_2d(point, poly[-1], poly[0]) <= 0
-  for i in range(len(poly) - 1):
-    if (_edge_2d(point, poly[i], poly[i + 1]) <= 0) != start:
-      return False
-  return True
+  return (
+      ((_edge_2d(point, poly[0], poly[1]) <= 0) == start)
+      and ((_edge_2d(point, poly[1], poly[-1]) <= 0) == start)
+      )
 
 
 def interpolate_attribute_2d(poly, attributes, point):
@@ -53,7 +53,7 @@ def interpolate_attribute_2d(poly, attributes, point):
   v1 = poly[1]
   v2 = poly[2]
 
-  # Calculate baycentric weights.
+  # Calculate barycentric weights.
   area_t = _double_area_2d(v0, v1, v2)
   w0 = _double_area_2d(point, v1, v2) / area_t
   w1 = _double_area_2d(point, v2, v0) / area_t
