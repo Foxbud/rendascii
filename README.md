@@ -2,11 +2,11 @@
 
 RendASCII is a real-time, z-buffering based 3D rendering engine written from scratch in and for Python 3. Unlike traditional real-time rendering engines, RendASCII renders frames as printable strings using ASCII characters for pixels. RendASCII is open source under the MIT license.
 
-[Project Homepage](https://bitbucket.org/Foxbud/rendascii)
+[Project Homepage](https://github.com/Foxbud/rendascii)
 
-[Project Documentation](https://bitbucket.org/Foxbud/rendascii/wiki)
+[Project Documentation](https://github.com/Foxbud/rendascii/wiki)
 
-Please direct questions to **rendascii@gmail.com**.
+Please direct questions to **garrett@fairburn.dev**.
 
 ## Features
 
@@ -32,7 +32,7 @@ Please direct questions to **rendascii@gmail.com**.
 
 ### Manual
 
-`$ git clone https://bitbucket.org/Foxbud/rendascii.git` - clone repository source.
+`$ git clone https://github.com/Foxbud/rendascii.git` - clone repository source.
 
 `$ cd rendascii` - change working directory to cloned source.
 
